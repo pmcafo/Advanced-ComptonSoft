@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
@@ -17,38 +18,60 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VUserActionAssembly_H
+#define ANLGEANT4_VUserActionAssembly_H 1
 
-#include "G4UserEventAction.hh"
-#include <list>
+#include <anlnext/BasicModule.hh>
+
+class G4Event;
+class G4Track;
+class G4Step;
+class G4Run;
+
+class G4RunManager;
+class G4UserStackingAction;
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
-
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Virtual UserActionAssembly module
+ * @author Hirokazu Odaka
+ * @date 2012-05-30 | Hirokazu Odaka | redesign (originally came from VPickUpData by Shin Watanabe)
+ * @date 2017-06-28 | Hirokazu Odaka | redesign, rename class and methods
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VUserActionAssembly : public anlnext::BasicModule
 {
+  DEFINE_ANL_MODULE(VUserActionAssembly, 5.0);
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  VUserActionAssembly();
+  virtual ~VUserActionAssembly();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  virtual void RunActionAtBeginning(const G4Run*) {}
+  virtual void RunActionAtEnd(const G4Run*) {}
+
+  virtual void EventActionAtBeginning(const G4Event*) {}
+  virtual void EventActionAtEnd(const G4Event*) {}
+
+  virtual void TrackActionAtBeginning(const G4Track*) {}
+  virtual void TrackActionAtEnd(const G4Track*) {}
+
+  virtual void SteppingAction(const G4Step*) {}
+
+  bool isSteppingActionEnabled() const { return steppingActionEnabled_; }
+
+  virtual void registerUserActions(G4RunManager* run_manager);
+
+protected:
+  void enableSteppingAction() { steppingActionEnabled_ = true; }
+  void disableSteppingAction() { steppingActionEnabled_ = false; }
+
+  virtual void printSummary();
 
 private:
-  std::list<VUserActionAssembly*> userActions_;
+  bool steppingActionEnabled_ = true;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VUserActionAssembly_H */

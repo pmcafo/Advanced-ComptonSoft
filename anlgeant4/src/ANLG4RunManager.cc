@@ -17,38 +17,21 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
-
-#include "G4UserEventAction.hh"
-#include <list>
+#include "ANLG4RunManager.hh"
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
+ANLG4RunManager::~ANLG4RunManager() = default;
 
-/**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
- */
-class UserActionAssemblyEventAction : public G4UserEventAction
+anlnext::ANLStatus ANLG4RunManager::performOneEvent(G4int i_event)
 {
-public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
-
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
-
-private:
-  std::list<VUserActionAssembly*> userActions_;
-};
+  ProcessOneEvent(i_event);
+  TerminateOneEvent();
+  if (runAborted) {
+    return anlnext::AS_QUIT;
+  }
+  return anlnext::AS_OK;
+}
 
 } /* namespace anlgeant4 */
-
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */

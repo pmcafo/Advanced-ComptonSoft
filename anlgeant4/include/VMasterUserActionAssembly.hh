@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
@@ -17,38 +18,48 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VMasterUserActionAssembly_H
+#define ANLGEANT4_VMasterUserActionAssembly_H 1
 
-#include "G4UserEventAction.hh"
+#include "VUserActionAssembly.hh"
 #include <list>
+
+class G4UserStackingAction;
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
+class VAppendableUserActionAssembly;
 
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Virtual master UserActionAssembly module
+ * @author Hirokazu Odaka
+ * @date 2017-06-29
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VMasterUserActionAssembly : public VUserActionAssembly
 {
+  DEFINE_ANL_MODULE(VMasterUserActionAssembly, 5.0);
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  VMasterUserActionAssembly();
+  virtual ~VMasterUserActionAssembly();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  void registerUserActions(G4RunManager* run_manager) override;
+
+  bool hasStackingAction() const { return (stackingAction_!=nullptr); }
+  void appendUserActions(VAppendableUserActionAssembly* user_action_assembly);
+
+protected:
+  void setStackingAction(G4UserStackingAction* v) { stackingAction_ = v; }
+  void printSummary() override;
 
 private:
-  std::list<VUserActionAssembly*> userActions_;
+  virtual void createUserActions() {}
+
+private:
+  G4UserStackingAction* stackingAction_ = nullptr;
+  std::list<VAppendableUserActionAssembly*> userActionsAppended_;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VUserActionAssembly_H */

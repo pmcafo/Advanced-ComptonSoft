@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,38 +18,45 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VANLGeometry_H
+#define ANLGEANT4_VANLGeometry_H 1
 
-#include "G4UserEventAction.hh"
-#include <list>
+#include <anlnext/BasicModule.hh>
+
+class G4VUserDetectorConstruction;
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
-
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Virtual geometry module
+ * @author Hirokazu Odaka
+ * @date xxxx-xx-xx
+ * @date 2012-05-30
+ * @date 2013-08-18 | H. Odaka | length unit, surface check
+ * @date 2017-07-03 | 4.2 | H. Odaka | length unit is fixed to cm
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VANLGeometry : public anlnext::BasicModule
 {
+  DEFINE_ANL_MODULE(VANLGeometry, 4.2);
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  VANLGeometry();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  virtual G4VUserDetectorConstruction* create() = 0;
+
+  double GetLengthUnit() const { return m_LengthUnit; }
+  std::string GetLengthUnitName() const { return m_LengthUnitName; }
+
+  bool SurfaceCheck() const { return m_SurfaceCheck; }
+
+  anlnext::ANLStatus mod_define() override;
 
 private:
-  std::list<VUserActionAssembly*> userActions_;
+  const double m_LengthUnit;
+  const std::string m_LengthUnitName;
+  bool m_SurfaceCheck;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VANLGeometry_H */

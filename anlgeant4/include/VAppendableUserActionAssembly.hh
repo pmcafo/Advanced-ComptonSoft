@@ -17,38 +17,29 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VAppendableUserActionAssembly_H
+#define ANLGEANT4_VAppendableUserActionAssembly_H 1
 
-#include "G4UserEventAction.hh"
-#include <list>
+#include "VUserActionAssembly.hh"
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
-
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Virtual appendable UserActionAssembly module
+ * @author Hirokazu Odaka
+ * @date 2017-06-29
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VAppendableUserActionAssembly : public VUserActionAssembly
 {
+  DEFINE_ANL_MODULE(VAppendableUserActionAssembly, 5.0);
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  VAppendableUserActionAssembly();
+  virtual ~VAppendableUserActionAssembly();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
-
-private:
-  std::list<VUserActionAssembly*> userActions_;
+  anlnext::ANLStatus mod_pre_initialize() override;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VAppendableUserActionAssembly_H */

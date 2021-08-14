@@ -17,10 +17,10 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_UserActionAssemblySteppingAction_H
+#define ANLGEANT4_UserActionAssemblySteppingAction_H 1
 
-#include "G4UserEventAction.hh"
+#include "G4UserSteppingAction.hh"
 #include <list>
 
 namespace anlgeant4
@@ -29,21 +29,19 @@ namespace anlgeant4
 class VUserActionAssembly;
 
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
+ * User SteppingAction class for UserActionAssembly
+ * @author M. Kouda, S. Watanabe, H. Odaka
  * @date 2003-01-10 (modified: S. Watanabe)
  * @date 2012-05-30 | Hirokazu Odaka | new design
  * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class UserActionAssemblySteppingAction : public G4UserSteppingAction
 {
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  explicit UserActionAssemblySteppingAction(const std::list<VUserActionAssembly*>& userActions);
+  ~UserActionAssemblySteppingAction();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  void UserSteppingAction(const G4Step*) override;
 
 private:
   std::list<VUserActionAssembly*> userActions_;
@@ -51,4 +49,4 @@ private:
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_UserActionAssemblySteppingAction_H */

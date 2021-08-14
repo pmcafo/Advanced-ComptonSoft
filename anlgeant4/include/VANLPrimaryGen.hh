@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,38 +18,34 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VANLPrimaryGen_H
+#define ANLGEANT4_VANLPrimaryGen_H 1
 
-#include "G4UserEventAction.hh"
-#include <list>
+#include <anlnext/BasicModule.hh>
+
+class G4VUserPrimaryGeneratorAction;
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
-
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Virtual primary generator module
+ * @author Shin Watanabe, Hirokazu Odaka
+ * @date xxxx-xx-xx
+ * @date 2011-xx-xx
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VANLPrimaryGen : public anlnext::BasicModule
 {
-public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
-
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
-
-private:
-  std::list<VUserActionAssembly*> userActions_;
+  DEFINE_ANL_MODULE(VANLPrimaryGen, 4.0);
+public: 
+  VANLPrimaryGen()
+  {
+    add_alias("VANLPrimaryGen");
+  }
+  
+  virtual G4VUserPrimaryGeneratorAction* create() = 0;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VANLPrimaryGen_H */

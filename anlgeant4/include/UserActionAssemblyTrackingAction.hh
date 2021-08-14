@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Masanobu Ozaki, Shin Watanabe, Hirokazu Odaka      *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,10 +18,10 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_UserActionAssemblyTrackingAction_H
+#define ANLGEANT4_UserActionAssemblyTrackingAction_H 1
 
-#include "G4UserEventAction.hh"
+#include "G4UserTrackingAction.hh"
 #include <list>
 
 namespace anlgeant4
@@ -29,21 +30,21 @@ namespace anlgeant4
 class VUserActionAssembly;
 
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
+ * User TrackingAction class for UserActionAssembly
+ * @author M. Ozaki, T. Takahashi, S. Watanabe, H. Odaka
+ * @date 2001-02-xx (M. Ozaki)
+ * @date 2002-04-29 (S. Watanabe)
  * @date 2012-05-30 | Hirokazu Odaka | new design
  * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class UserActionAssemblyTrackingAction : public G4UserTrackingAction
 {
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  explicit UserActionAssemblyTrackingAction(const std::list<VUserActionAssembly*>& userActions);
+  virtual ~UserActionAssemblyTrackingAction();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  void PreUserTrackingAction(const G4Track* aTrack) override;
+  void PostUserTrackingAction(const G4Track* aTrack) override;
 
 private:
   std::list<VUserActionAssembly*> userActions_;
@@ -51,4 +52,4 @@ private:
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_UserActionAssemblyTrackingAction_H */

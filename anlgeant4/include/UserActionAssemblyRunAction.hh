@@ -17,10 +17,10 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_UserActionAssemblyRunAction_H
+#define ANLGEANT4_UserActionAssemblyRunAction_H 1
 
-#include "G4UserEventAction.hh"
+#include "G4UserRunAction.hh"
 #include <list>
 
 namespace anlgeant4
@@ -29,21 +29,21 @@ namespace anlgeant4
 class VUserActionAssembly;
 
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
+ * User RunAction class for UserActionAssembly.
+ * @author M. Kouda, S. Watanabe, H. Odaka
+ * @date 2002-12-07 (modified: S. Watanabe)
  * @date 2012-05-30 | Hirokazu Odaka | new design
  * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class UserActionAssemblyRunAction : public G4UserRunAction
 {
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  explicit UserActionAssemblyRunAction(const std::list<VUserActionAssembly*>& userActions);
+  virtual ~UserActionAssemblyRunAction();
 
 public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  void BeginOfRunAction(const G4Run* aRun) override;
+  void EndOfRunAction(const G4Run* aRun) override;
 
 private:
   std::list<VUserActionAssembly*> userActions_;
@@ -51,4 +51,4 @@ private:
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_UserActionAssemblyRunAction_H */

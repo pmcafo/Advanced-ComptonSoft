@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,38 +18,60 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VisualizeG4Geom_H
+#define ANLGEANT4_VisualizeG4Geom_H 1
 
-#include "G4UserEventAction.hh"
-#include <list>
+#include <memory>
+#include <anlnext/BasicModule.hh>
+#include "G4ThreeVector.hh"
 
-namespace anlgeant4
-{
+class G4VisManager;
+class G4UImanager;
+class G4UIExecutive;
 
-class VUserActionAssembly;
+
+namespace anlgeant4 {
+
 
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Geant4 visualization for Compton Soft
+ * @author Hirokazu Odaka
+ * @date 2011-09-28
+ * @date 2012-02-15
+ * @date 2012-08-06
+ * @date 2012-10-04
+ * @date 2016-09-06
+ * @date 2017-06-21 | explicit delete of the visualization manager.
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VisualizeG4Geom  : public anlnext::BasicModule
 {
-public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
+  DEFINE_ANL_MODULE(VisualizeG4Geom, 1.5);
+public: 
+  VisualizeG4Geom();
+  ~VisualizeG4Geom();
 
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_end_run() override;
+  anlnext::ANLStatus mod_finalize() override;
 
 private:
-  std::list<VUserActionAssembly*> userActions_;
+  void applyDefaultCommands();
+  
+private:
+  std::unique_ptr<G4VisManager> m_VisManager;
+  std::unique_ptr<G4UIExecutive> m_UIExecutive;
+  G4UImanager* m_UIManager;
+
+  std::string m_Mode;
+  G4ThreeVector m_TargetPoint;
+  G4ThreeVector m_ViewPoint;
+  G4ThreeVector m_UpVector;
+  double m_Zoom;
+  bool m_AuxiliaryEdge;
+  std::string m_MacroFile;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VisualizeG4Geom_H */

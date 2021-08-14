@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,38 +18,34 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_UserActionAssemblyEventAction_H
-#define ANLGEANT4_UserActionAssemblyEventAction_H 1
+#ifndef ANLGEANT4_VANLPhysicsList_H
+#define ANLGEANT4_VANLPhysicsList_H
 
-#include "G4UserEventAction.hh"
-#include <list>
+#include <anlnext/BasicModule.hh>
+
+class G4VUserPhysicsList;
 
 namespace anlgeant4
 {
 
-class VUserActionAssembly;
-
 /**
- * User EventAction class for UserActionAssembly.
- * @author S. Watanabe, H. Odaka
- * @date 2003-01-10 (modified: S. Watanabe)
- * @date 2012-05-30 | Hirokazu Odaka | new design
- * @date 2017-07-29 | Hirokazu Odaka | rename class, introduce user action list
+ * Virtual physics list module
+ * @author Shin Watanabe, Hirokazu Odaka
+ * @date xxxx-xx-xx
+ * @date 2012-05-30
  */
-class UserActionAssemblyEventAction : public G4UserEventAction
+class VANLPhysicsList : public anlnext::BasicModule
 {
+  DEFINE_ANL_MODULE(VANLPhysicsList, 4.0);
 public:
-  explicit UserActionAssemblyEventAction(const std::list<VUserActionAssembly*>& userActions);
-  virtual ~UserActionAssemblyEventAction();
-
-public:
-  void BeginOfEventAction(const G4Event* anEvent) override;
-  void EndOfEventAction(const G4Event* anEvent) override;
-
-private:
-  std::list<VUserActionAssembly*> userActions_;
+  VANLPhysicsList()
+  {
+    add_alias("VANLPhysicsList");
+  }
+  
+  virtual G4VUserPhysicsList* create() = 0;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_UserActionAssemblyEventAction_H */
+#endif /* ANLGEANT4_VANLPhysicsList_H */
