@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_PlaneWavePrimaryGen_H
+#define ANLGEANT4_PlaneWavePrimaryGen_H 1
 
 #include "BasicPrimaryGen.hh"
 #include "G4ThreeVector.hh"
@@ -28,50 +28,51 @@ namespace anlgeant4 {
 
 /**
  * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
+ * The primary particles are generated like a plane wave.
  *
  * @author Hirokazu Odaka
- * @date 2010-xx-xx
+ * @date 2010-02-17
+ * @date 2010-04-08 | Hirokazu Odaka | ANLLite
+ * @date 2011-04-08 | Hirokazu Odaka | particle name
+ * @date 2011-04-11 | Hirokazu Odaka | derived from AHPrimaryGen (BasicPrimaryGen)
+ * @date 2012-07-10 | Hirokazu Odaka | add degree of polarization
+ * @date 2013-08-18 | Hirokazu Odaka | v1.4: be moved to anlgeant4
  * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class PlaneWavePrimaryGen : public anlgeant4::BasicPrimaryGen
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
+  DEFINE_ANL_MODULE(PlaneWavePrimaryGen, 4.1);
 public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
+  PlaneWavePrimaryGen();
+  ~PlaneWavePrimaryGen();
+
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_end_run() override;
-
+  
   void makePrimarySetting() override;
 
 protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
   G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
+  G4ThreeVector Direction() const { return m_Direction0; }
+  G4ThreeVector DirectionOrthogonal() const { return m_DirectionOrthogonal; }
 
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
+  G4ThreeVector samplePosition() override;
+  virtual double GenerationArea();
   
 private:
   G4ThreeVector m_CenterPosition;
+  
+  G4ThreeVector m_Direction0;
+  G4ThreeVector m_DirectionOrthogonal;
   double m_Radius;
-  double m_Distance;
-  G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
-  double m_CosTheta0;
-  double m_CosTheta1;
-  double m_CoveringFactor;
 
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  G4ThreeVector m_Polarization0;
+  double m_PolarizationDegree;
+  
+  double m_Flux;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_PlaneWavePrimaryGen_H */

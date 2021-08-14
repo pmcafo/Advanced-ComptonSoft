@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,61 +18,41 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_NucleusPrimaryInVolume_H
+#define ANLGEANT4_NucleusPrimaryInVolume_H 1
 
-#include "BasicPrimaryGen.hh"
-#include "G4ThreeVector.hh"
+#include <string>
+#include <vector>
+#include "NucleusPrimaryGen.hh"
+#include "PositionSamplerInVolume.hh"
 
 namespace anlgeant4 {
 
-
 /**
- * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
  *
- * @author Hirokazu Odaka
- * @date 2010-xx-xx
- * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
+ * @date 2008-09-19 Hirokazu Odaka
+ * @date 2011-04-12 Hirokazu Odaka
+ * @date 2011-06-22 Hirokazu Odaka
+ * @date 2017-06-27 Hirokazu Odaka | tweak
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class NucleusPrimaryGenInVolume : public NucleusPrimaryGen
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
-public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
+  DEFINE_ANL_MODULE(NucleusPrimaryGenInVolume, 4.1);
+public: 
+  NucleusPrimaryGenInVolume();
+  ~NucleusPrimaryGenInVolume();
+
   anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_end_run() override;
+  anlnext::ANLStatus mod_communicate() override;
+  anlnext::ANLStatus mod_begin_run() override;
 
   void makePrimarySetting() override;
 
-protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
-  G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
-
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
-  
 private:
-  G4ThreeVector m_CenterPosition;
-  double m_Radius;
-  double m_Distance;
-  G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
-  double m_CosTheta0;
-  double m_CosTheta1;
-  double m_CoveringFactor;
-
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  anlgeant4::PositionSamplerInVolume m_PositionSampler;
+  std::vector<std::string> m_VolumeHierarchy;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_NucleusPrimaryGenInVolume_H */

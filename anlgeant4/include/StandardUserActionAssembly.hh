@@ -17,61 +17,40 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_StandardUserActionAssembly_H
+#define ANLGEANT4_StandardUserActionAssembly_H 1
 
-#include "BasicPrimaryGen.hh"
-#include "G4ThreeVector.hh"
+#include "VMasterUserActionAssembly.hh"
+#include <list>
 
 namespace anlgeant4 {
 
+class InitialInformation;
 
 /**
- * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
- *
  * @author Hirokazu Odaka
- * @date 2010-xx-xx
- * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
+ * @date 2011-04-11
+ * @date 2016-07-08 | setInitialTime()
+ * @date 2017-06-28 | Hirokazu Odaka | redesign, rename class and methods
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class StandardUserActionAssembly : public VMasterUserActionAssembly
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
+  DEFINE_ANL_MODULE(StandardUserActionAssembly, 5.0);
 public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_end_run() override;
+  StandardUserActionAssembly();
 
-  void makePrimarySetting() override;
+  anlnext::ANLStatus mod_initialize() override;
+
+  void EventActionAtBeginning(const G4Event* anEvent) override;
 
 protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
-  G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
+  double getInitialTime() const;
+  void setInitialTime(double v);
 
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
-  
 private:
-  G4ThreeVector m_CenterPosition;
-  double m_Radius;
-  double m_Distance;
-  G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
-  double m_CosTheta0;
-  double m_CosTheta1;
-  double m_CoveringFactor;
-
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  InitialInformation* m_InitialInfo;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_StandardUserActionAssembly_H */

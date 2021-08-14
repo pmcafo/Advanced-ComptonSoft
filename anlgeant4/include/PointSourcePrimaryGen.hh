@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_PointSourcePrimaryGen_H
+#define ANLGEANT4_PointSourcePrimaryGen_H 1
 
 #include "BasicPrimaryGen.hh"
 #include "G4ThreeVector.hh"
@@ -28,19 +28,22 @@ namespace anlgeant4 {
 
 /**
  * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
+ * Primary particles are generated at a fixed point.
  *
- * @author Hirokazu Odaka
- * @date 2010-xx-xx
+ * @author Shin Watanabe, Hirokazu Odaka
+ * @date xxxx-xx-xx | Shin Watanabe | NSPrimaryGen
+ * @date 2010-02-17 | Hirokazu Odaka | PointSourcePrimaryGen
+ * @date 2012-07-10 | Hirokazu Odaka | virtual methods: sampleDirection(), samplePosition()
+ * @date 2013-08-18 | Hirokazu Odaka | be moved to anlgeant4
  * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class PointSourcePrimaryGen : public BasicPrimaryGen
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
+  DEFINE_ANL_MODULE(PointSourcePrimaryGen, 4.1);
 public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
+  PointSourcePrimaryGen();
+  ~PointSourcePrimaryGen();
+
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_end_run() override;
@@ -48,30 +51,28 @@ public:
   void makePrimarySetting() override;
 
 protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
-  G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
+  void setSourcePosition(G4ThreeVector v) { m_SourcePosition = v; }
+  void setCenterDirection(G4ThreeVector v) { m_CenterDirection = v; }
+  void calculateRotation();
 
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
-  
+  G4ThreeVector sampleDirection() override;
+  G4ThreeVector samplePosition() override;
+
+  G4ThreeVector SourcePosition() { return m_SourcePosition; }
+
 private:
-  G4ThreeVector m_CenterPosition;
-  double m_Radius;
-  double m_Distance;
+  G4ThreeVector m_SourcePosition;
+  
   G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
+  double m_Theta0;
+  double m_Theta1;
   double m_CosTheta0;
   double m_CosTheta1;
   double m_CoveringFactor;
-
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  
+  double m_Luminosity;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_PointSourcePrimaryGen_H */

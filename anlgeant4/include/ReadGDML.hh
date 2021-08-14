@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,61 +18,36 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_ReadGDML_H
+#define ANLGEANT4_ReadGDML_H 1
 
-#include "BasicPrimaryGen.hh"
-#include "G4ThreeVector.hh"
+#include "VANLGeometry.hh"
+
+class G4VUserDetectorConstruction;
 
 namespace anlgeant4 {
 
-
 /**
- * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
- *
+ * GDML Geometry module
  * @author Hirokazu Odaka
- * @date 2010-xx-xx
- * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
+ * @date 2011-07-30
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class ReadGDML : public VANLGeometry
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
+  DEFINE_ANL_MODULE(ReadGDML, 1.0);
+
 public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
+  ReadGDML();
+
   anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_end_run() override;
 
-  void makePrimarySetting() override;
+  G4VUserDetectorConstruction* create() override;
 
-protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
-  G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
-
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
-  
 private:
-  G4ThreeVector m_CenterPosition;
-  double m_Radius;
-  double m_Distance;
-  G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
-  double m_CosTheta0;
-  double m_CosTheta1;
-  double m_CoveringFactor;
-
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  std::string m_GeometryFileName;
+  bool m_Validate;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_ReadGDML_H */

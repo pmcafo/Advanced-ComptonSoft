@@ -17,61 +17,41 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_PlaneWaveRectanglePrimaryGen_H
+#define ANLGEANT4_PlaneWaveRectanglePrimaryGen_H 1
 
-#include "BasicPrimaryGen.hh"
+#include "PlaneWavePrimaryGen.hh"
 #include "G4ThreeVector.hh"
 
 namespace anlgeant4 {
 
-
 /**
  * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
- *
+ * Primary particles are generated like a plane wave and from a fixed rectangle.
  * @author Hirokazu Odaka
- * @date 2010-xx-xx
- * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
+ * @date 2011-06-15 | Hirokazu Odaka | based on PlaneWavePrimaryGen
+ * @date 2011-07-10 | Hirokazu Odaka | derived from PlaneWavePrimaryGen
+ * @date 2016-01-07 | Hirokazu Odaka | introduce roll angle
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class PlaneWaveRectanglePrimaryGen : public anlgeant4::PlaneWavePrimaryGen
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
+  DEFINE_ANL_MODULE(PlaneWaveRectanglePrimaryGen, 4.1);
 public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_end_run() override;
+  PlaneWaveRectanglePrimaryGen();
+  ~PlaneWaveRectanglePrimaryGen();
 
-  void makePrimarySetting() override;
+  anlnext::ANLStatus mod_define() override;
 
 protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
-  G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
-
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
+  G4ThreeVector samplePosition() override;
+  double GenerationArea() override;
   
 private:
-  G4ThreeVector m_CenterPosition;
-  double m_Radius;
-  double m_Distance;
-  G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
-  double m_CosTheta0;
-  double m_CosTheta1;
-  double m_CoveringFactor;
-
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  double m_SizeX;
+  double m_SizeY;
+  double m_RollAngle;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_PlaneWaveRectanglePrimaryGen_H */

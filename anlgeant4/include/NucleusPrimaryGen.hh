@@ -17,61 +17,46 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLGEANT4_IsotropicPrimaryGen_H
-#define ANLGEANT4_IsotropicPrimaryGen_H 1
+#ifndef ANLGEANT4_NucleusPrimaryGen_H
+#define ANLGEANT4_NucleusPrimaryGen_H 1
 
 #include "BasicPrimaryGen.hh"
 #include "G4ThreeVector.hh"
+
+class G4ParticleDefinition;
 
 namespace anlgeant4 {
 
 
 /**
  * ANLGeant4 PrimaryGen module.
- * Isotropic and homogeneous particle distribution are realized.
+ * A nucleus is generated.
  *
  * @author Hirokazu Odaka
- * @date 2010-xx-xx
- * @date 2017-06-27 | Hirokazu Odaka | 4.1, makePrimarySetting()
+ * @date 2011-04-12
+ * @date 2016-12-09 | v4.1: migration to geant4 10.3
+ * @date 2017-06-30 | v4.2: floating level
  */
-class IsotropicPrimaryGen : public anlgeant4::BasicPrimaryGen
+class NucleusPrimaryGen : public BasicPrimaryGen
 {
-  DEFINE_ANL_MODULE(IsotropicPrimaryGen, 4.1);
+  DEFINE_ANL_MODULE(NucleusPrimaryGen, 4.2);
 public:
-  IsotropicPrimaryGen();
-  ~IsotropicPrimaryGen();
-  
+  NucleusPrimaryGen();
+  ~NucleusPrimaryGen();
+
   anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_end_run() override;
+  anlnext::ANLStatus mod_begin_run() override;
 
   void makePrimarySetting() override;
-
-protected:
-  double Radius() const { return m_Radius; }
-  double Distance() const { return m_Distance; }
-  double CoveringFactor() const { return m_CoveringFactor; }
-  G4ThreeVector CenterDirection() const { return m_CenterDirection; }
-  G4ThreeVector CenterPosition() const { return m_CenterPosition; }
-  double Intensity() const { return m_Intensity; }
-
-  void setCoveringFactor (double v) { m_CoveringFactor = v; }
-  void setIntensity(double v) { m_Intensity = v; }
   
 private:
-  G4ThreeVector m_CenterPosition;
-  double m_Radius;
-  double m_Distance;
-  G4ThreeVector m_CenterDirection;
-  double m_ThetaMin;
-  double m_ThetaMax;
-  double m_CosTheta0;
-  double m_CosTheta1;
-  double m_CoveringFactor;
-
-  double m_Intensity; // energy per unit {time, area, solid angle}
+  G4ThreeVector m_Position0;
+  int m_RIZ = 0;
+  int m_RIA = 0;
+  double m_RIEnergy = 0.0;
+  int m_RIFloatingLevel = 0;
 };
 
 } /* namespace anlgeant4 */
 
-#endif /* ANLGEANT4_IsotropicPrimaryGen_H */
+#endif /* ANLGEANT4_NucleusPrimaryGen_H */
