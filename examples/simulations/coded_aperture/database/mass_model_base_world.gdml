@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<volume name="World.log">
+  <materialref ref="Vacuum" />
+  <solidref ref="World.box" />
+  <physvol name="SiDetector">
+    <volumeref ref="SiDetector.log" />
+    <position name="SiDetector.pos" unit="mm"

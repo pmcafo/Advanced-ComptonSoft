@@ -24,4 +24,33 @@
   </materials>
   <solids>
     <box lunit="mm" name="Si.box" x="30.72" y="30.72" z="0.2" />
-    <box lunit="mm" name="World.box" x="1000.0
+    <box lunit="mm" name="World.box" x="1000.0" y="1000.0" z="1000.0" />
+    <box lunit="mm" name="Depletion.box" x="30.72" y="30.72" z="0.2" />
+  </solids>
+  <structure>
+    <volume name="Depletion.log">
+      <materialref ref="Si" />
+      <solidref ref="Depletion.box" />
+    </volume>
+    <volume name="SiDetector.log">
+      <materialref ref="Si" />
+      <solidref ref="Si.box" />
+      <physvol name="Depletion">
+        <volumeref ref="Depletion.log" />
+        <position name="Depletion.pos" unit="mm" x="0.0" y="0.0" z="0.0" />
+      </physvol>
+    </volume>
+    <volume name="World.log">
+    <materialref ref="Vacuum" />
+      <solidref ref="World.box" />
+      <physvol name="SiDetector">
+        <volumeref ref="SiDetector.log" />
+        <position name="SiDetector.pos" unit="mm" x="0.0" y="0.0" z="-0.1" />
+      </physvol>
+    </volume>
+  </structure>
+  <setup name="Default" version="1.0">
+    <world ref="World.log" />
+  </setup>
+</gdml>
+
