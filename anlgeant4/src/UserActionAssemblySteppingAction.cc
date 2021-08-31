@@ -17,30 +17,23 @@
  *                                                                       *
  *************************************************************************/
 
-#include "UserActionAssemblyRunAction.hh"
+#include "UserActionAssemblySteppingAction.hh"
 #include "VUserActionAssembly.hh"
 
 namespace anlgeant4
 {
 
-UserActionAssemblyRunAction::UserActionAssemblyRunAction(const std::list<VUserActionAssembly*>& userActions)
+UserActionAssemblySteppingAction::UserActionAssemblySteppingAction(const std::list<VUserActionAssembly*>& userActions)
   : userActions_(userActions)
 {
 }
 
-UserActionAssemblyRunAction::~UserActionAssemblyRunAction() = default;
+UserActionAssemblySteppingAction::~UserActionAssemblySteppingAction() = default;
 
-void UserActionAssemblyRunAction::BeginOfRunAction(const G4Run* aRun)
+void UserActionAssemblySteppingAction::UserSteppingAction(const G4Step* aStep)
 {
   for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtBeginning(aRun);
-  }
-}
-
-void UserActionAssemblyRunAction::EndOfRunAction(const G4Run* aRun)
-{
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtEnd(aRun);
+    pud->SteppingAction(aStep);
   }
 }
 

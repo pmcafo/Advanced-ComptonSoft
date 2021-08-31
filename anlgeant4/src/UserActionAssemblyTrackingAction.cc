@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Masanobu Ozaki, Shin Watanabe, Hirokazu Odaka      *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,30 +17,35 @@
  *                                                                       *
  *************************************************************************/
 
-#include "UserActionAssemblyRunAction.hh"
+#include "UserActionAssemblyTrackingAction.hh"
+#include "G4TrackingManager.hh"
+#include "G4Trajectory.hh"
 #include "VUserActionAssembly.hh"
 
 namespace anlgeant4
 {
 
-UserActionAssemblyRunAction::UserActionAssemblyRunAction(const std::list<VUserActionAssembly*>& userActions)
+UserActionAssemblyTrackingAction::UserActionAssemblyTrackingAction(const std::list<VUserActionAssembly*>& userActions)
   : userActions_(userActions)
 {
 }
 
-UserActionAssemblyRunAction::~UserActionAssemblyRunAction() = default;
+UserActionAssemblyTrackingAction::~UserActionAssemblyTrackingAction() = default;
 
-void UserActionAssemblyRunAction::BeginOfRunAction(const G4Run* aRun)
+void UserActionAssemblyTrackingAction::PreUserTrackingAction(const G4Track* aTrack)
 {
+  fpTrackingManager->SetStoreTrajectory(true);
+  fpTrackingManager->SetTrajectory(new G4Trajectory(aTrack));
+  
   for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtBeginning(aRun);
+    pud->TrackActionAtBeginning(aTrack);
   }
 }
 
-void UserActionAssemblyRunAction::EndOfRunAction(const G4Run* aRun)
+void UserActionAssemblyTrackingAction::PostUserTrackingAction(const G4Track* aTrack)
 {
   for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtEnd(aRun);
+    pud->TrackActionAtEnd(aTrack);
   }
 }
 

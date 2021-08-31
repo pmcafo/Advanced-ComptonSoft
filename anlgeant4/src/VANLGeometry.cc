@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,31 +17,26 @@
  *                                                                       *
  *************************************************************************/
 
-#include "UserActionAssemblyRunAction.hh"
-#include "VUserActionAssembly.hh"
+#include "VANLGeometry.hh"
+#include "AstroUnits.hh"
+
+using namespace anlnext;
 
 namespace anlgeant4
 {
 
-UserActionAssemblyRunAction::UserActionAssemblyRunAction(const std::list<VUserActionAssembly*>& userActions)
-  : userActions_(userActions)
+VANLGeometry::VANLGeometry()
+  : m_LengthUnit(unit::cm),
+    m_LengthUnitName("cm"),
+    m_SurfaceCheck(true)
 {
+  add_alias("VANLGeometry");
 }
 
-UserActionAssemblyRunAction::~UserActionAssemblyRunAction() = default;
-
-void UserActionAssemblyRunAction::BeginOfRunAction(const G4Run* aRun)
+ANLStatus VANLGeometry::mod_define()
 {
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtBeginning(aRun);
-  }
-}
-
-void UserActionAssemblyRunAction::EndOfRunAction(const G4Run* aRun)
-{
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtEnd(aRun);
-  }
+  register_parameter(&m_SurfaceCheck, "surface_check");
+  return AS_OK;
 }
 
 } /* namespace anlgeant4 */

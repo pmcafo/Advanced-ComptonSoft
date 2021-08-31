@@ -17,31 +17,24 @@
  *                                                                       *
  *************************************************************************/
 
-#include "UserActionAssemblyRunAction.hh"
-#include "VUserActionAssembly.hh"
+#include "VAppendableUserActionAssembly.hh"
+#include "VMasterUserActionAssembly.hh"
+
+using namespace anlnext;
 
 namespace anlgeant4
 {
 
-UserActionAssemblyRunAction::UserActionAssemblyRunAction(const std::list<VUserActionAssembly*>& userActions)
-  : userActions_(userActions)
-{
-}
+VAppendableUserActionAssembly::VAppendableUserActionAssembly() = default;
+VAppendableUserActionAssembly::~VAppendableUserActionAssembly() = default;
 
-UserActionAssemblyRunAction::~UserActionAssemblyRunAction() = default;
-
-void UserActionAssemblyRunAction::BeginOfRunAction(const G4Run* aRun)
+ANLStatus VAppendableUserActionAssembly::mod_pre_initialize()
 {
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtBeginning(aRun);
-  }
-}
+  VMasterUserActionAssembly* master;
+  get_module_IFNC("VMasterUserActionAssembly", &master);
+  master->appendUserActions(this);
 
-void UserActionAssemblyRunAction::EndOfRunAction(const G4Run* aRun)
-{
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtEnd(aRun);
-  }
+  return AS_OK;
 }
 
 } /* namespace anlgeant4 */

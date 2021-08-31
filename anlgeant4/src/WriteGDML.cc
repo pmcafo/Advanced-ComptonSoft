@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Shin Watanabe, Hirokazu Odaka                      *
+ * Copyright (c) 2011 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,31 +17,34 @@
  *                                                                       *
  *************************************************************************/
 
-#include "UserActionAssemblyRunAction.hh"
-#include "VUserActionAssembly.hh"
+#include "WriteGDML.hh"
+#include "G4GDMLParser.hh"
 
-namespace anlgeant4
-{
+using namespace anlnext;
+using namespace anlgeant4;
 
-UserActionAssemblyRunAction::UserActionAssemblyRunAction(const std::list<VUserActionAssembly*>& userActions)
-  : userActions_(userActions)
+WriteGDML::WriteGDML()
+  : m_GeometryFileName("detector.gdml")
 {
 }
 
-UserActionAssemblyRunAction::~UserActionAssemblyRunAction() = default;
 
-void UserActionAssemblyRunAction::BeginOfRunAction(const G4Run* aRun)
+ANLStatus WriteGDML::mod_define()
 {
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtBeginning(aRun);
-  }
+  register_parameter(&m_GeometryFileName, "file");
+    
+  return AS_OK;
 }
 
-void UserActionAssemblyRunAction::EndOfRunAction(const G4Run* aRun)
-{
-  for (VUserActionAssembly* pud: userActions_) {
-    pud->RunActionAtEnd(aRun);
-  }
-}
 
-} /* namespace anlgeant4 */
+ANLStatus WriteGDML::mod_initialize()
+{ 
+  G4VPhysicalVolume* world = 
+    G4TransportationManager::GetTransportationManager()
+    ->GetNavigatorForTracking()->GetWorldVolume();
+  G4GDMLParser parser;
+  // parser.Write("output.gdml", world, true, "path_to_GDML_schema");
+  parser.Write(m_GeometryFileName, world, false);
+  
+  return AS_OK;
+}
