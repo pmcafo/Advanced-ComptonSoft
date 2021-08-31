@@ -95,4 +95,22 @@ endif(CS_USE_SIMX)
 
 ### HSQuickLook ###
 if(CS_USE_HSQUICKLOOK)
-  find_path(HSQUIC
+  find_path(HSQUICKLOOK_INC_DIR
+    NAMES hsquicklook/DocumentBuilder.hh
+    PATHS $ENV{HSQUICKLOOK_INSTALL}/include /usr/local/include $ENV{HOME}/include)
+  find_library(HSQUICKLOOK_LIB
+    NAMES HSQuickLookAnalyzer
+    PATHS $ENV{HSQUICKLOOK_INSTALL}/lib /usr/local/lib $ENV{HOME}/lib)
+  message("-- HSQUICKLOOK_INC_DIR: ${HSQUICKLOOK_INC_DIR}")
+  message("-- HSQUICKLOOK_LIB: ${HSQUICKLOOK_LIB}")
+
+  find_package(mongocxx REQUIRED)
+  set(MONGOCXX_LIB mongo::mongocxx_shared)
+endif(CS_USE_HSQUICKLOOK)
+
+### Xerces-C ###
+if(CS_USE_GDML)
+  find_package(XercesC REQUIRED)
+  message("-- XercesC_INCLUDE_DIRS: ${XercesC_INCLUDE_DIRS}")
+  message("-- XercesC_LIBRARIES: ${XercesC_LIBRARIES}")
+endif(CS_USE_GDML)
