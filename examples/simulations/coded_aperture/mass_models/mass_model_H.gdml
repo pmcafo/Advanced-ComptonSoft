@@ -1948,4 +1948,41 @@
         <volumeref ref='Hole.log'/>
         <position name='Hole_30_25.pos' unit='mm' x='-1.2' y='0.8' z='0.0'/>
       </physvol>
-      <physvol name='Hole_30
+      <physvol name='Hole_30_26'>
+        <volumeref ref='Hole.log'/>
+        <position name='Hole_30_26.pos' unit='mm' x='-1.2' y='0.8800000000000001' z='0.0'/>
+      </physvol>
+      <physvol name='Hole_30_27'>
+        <volumeref ref='Hole.log'/>
+        <position name='Hole_30_27.pos' unit='mm' x='-1.2' y='0.9600000000000002' z='0.0'/>
+      </physvol>
+      <physvol name='Hole_30_28'>
+        <volumeref ref='Hole.log'/>
+        <position name='Hole_30_28.pos' unit='mm' x='-1.2' y='1.0400000000000003' z='0.0'/>
+      </physvol>
+      <physvol name='Hole_30_29'>
+        <volumeref ref='Hole.log'/>
+        <position name='Hole_30_29.pos' unit='mm' x='-1.2' y='1.1199999999999999' z='0.0'/>
+      </physvol>
+      <physvol name='Hole_30_30'>
+        <volumeref ref='Hole.log'/>
+        <position name='Hole_30_30.pos' unit='mm' x='-1.2' y='1.2' z='0.0'/>
+      </physvol>
+    </volume>
+    <volume name='World.log'>
+      <materialref ref='Vacuum'/>
+      <solidref ref='World.box'/>
+      <physvol name='SiDetector'>
+        <volumeref ref='SiDetector.log'/>
+        <position name='SiDetector.pos' unit='mm' x='0.0' y='0.0' z='-0.5'/>
+      </physvol>
+      <physvol name='Mask'>
+        <volumeref ref='Mask.log'/>
+        <position name='Mask.pos' unit='mm' x='0.0' y='0.0' z='223.0'/>
+      </physvol>
+    </volume>
+  </structure>
+  <setup name='Default' version='1.0'>
+    <world ref='World.log'/>
+  </setup>
+</gdml>

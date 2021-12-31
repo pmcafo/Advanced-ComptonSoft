@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/xsl" href="https://raw.githubusercontent.com/odakahirokazu/ComptonSoft/master/xmlstyle/channel_properties_v2.xsl" ?>
+
+<channel_properties>
+  <name>CdTe pixel detector</name>
+  <comment>2016-08-26 | Hirokazu Odaka</comment>
+  <data>
+    <readout_module id="0">
+      <section id="0" all="1">
+        <common>
+       
