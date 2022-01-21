@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="https://raw.githubusercontent.com/odakahirokazu/ComptonSoft/master/xmlstyle/detector_parameters_v3.xsl" ?>
+
+<detector_parameters>
+  <name>LArBox detector</name>
+  <comment>2022-04-27 | Hiro Odaka</comment>
+  <auto_position flag="0" />
+  <sensitive_detector_not_found_warning flag="1" />
+  <data>
+    <sensitive_detector type="3DVoxel" name="LArBox.log">
+      <common>
+        <parameters>
+          <upside anode="1" readout="1" />
+          <quenching factor="0.6" />
+          <temperature value="87.0" />
+          <charge_collection mode="0" />
+          <diffusion mode="2">
+            <constant anode="0.01" />
+          </diffusion>
+          <channel_properties>
+            <disable status="0" />
+            <noise_level param0="5.0" param1="0.5" param2="0.0" />
+            <compensation factor="1.0" />
+            <threshold value="25.0" />
