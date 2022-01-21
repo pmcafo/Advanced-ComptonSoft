@@ -94,3 +94,14 @@ def convert_ROOT_to_RMF(setup_yamlfile):
 
 	hdu.writeto(output_rmffile)    
 	sys.stdout.write('Creating FITS File is succeeded\n')
+
+
+if __name__ == "__main__":
+	if len(sys.argv) != 2:
+		sys.stderr.write('%s response_setup.yaml \n' % sys.argv[0])
+		quit()
+	setupfile = sys.argv[1]
+	convert_ROOT_to_RMF(setupfile)
+
+
+	
