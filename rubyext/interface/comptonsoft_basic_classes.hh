@@ -1,0 +1,12 @@
+
+#include "TGraph.h"
+#include "TFile.h"
+#include "TRandom.h"
+#include "BasicComptonEvent.hh"
+#include "VEventReconstructionAlgorithm.hh"
+#include "HitTreeIOWithInitialInfo.hh"
+#include "EventTreeIOWithInitialInfo.hh"
+#include "ComptonEventTreeIOWithInitialInfo.hh"
+#include "ObservationTreeIOWithInitialInfo.hh"
+#include "FrameData.hh"
+#include "XrayEventTreeIO.hh"
