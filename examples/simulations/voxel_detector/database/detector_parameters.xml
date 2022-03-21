@@ -22,3 +22,13 @@
             <noise_level param0="5.0" param1="0.5" param2="0.0" />
             <compensation factor="1.0" />
             <threshold value="25.0" />
+          </channel_properties>
+          <reconstruction mode="2" />
+        </parameters>
+      </common>
+      <detector_list id_method="path" layer_offset="1">
+        <detector id="1" path="LArBox" />
+      </detector_list>
+    </sensitive_detector>
+  </data>
+</detector_parameters>
