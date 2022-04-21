@@ -1,0 +1,299 @@
+#include "SGDEventFITS.hh"
+#include <boost/format.hpp>
+
+namespace
+{
+
+void fillFlagArray(uint64_t flags, int shift, int size, uint8_t* array)
+{
+  for (int i = 0; i<size; i++) {
+    array[i] = (flags >> (shift + i)) & 0x1u;
+  }
+}
+
+uint64_t convertFlags(uint8_t* array)
+{
+  const int size = 64;
+  uint64_t flags = 0ul;
+  for (int i = 0; i<size; i++) {
+    if (array[i]) {
+      flags |= (0x1ul << i);
+    }
+  }
+  return flags;
+}
+
+} // anonymous namespace
+
+namespace astroh {
+namespace sgd {
+
+using namespace cfitsio;
+
+EventFITSIOHelper::EventFITSIOHelper()
+{
+}
+
+EventFITSIOHelper::~EventFITSIOHelper() = default;
+
+void EventFITSIOHelper::fillEvent(const sgd::Event& event)
+{
+  TIME_[0] = event.getTime();
+  S_TIME_[0] = event.getSTime();
+  ADU_CNT_[0] = event.getADUCount();
+  L32TI_[0] = event.getL32TI();
+  OCCURRENCE_ID_[0] = event.getOccurrenceID();
+  LOCAL_TIME_[0] = event.getLocalTime();
+  CATEGORY_[0] = event.getCategory();
+  const uint64_t flags = event.getFlags().get();
+  fillFlagArray(flags,  0, 64, FLAGS_.data());
+  fillFlagArray(flags, 63,  1, FLAG_LCHKMIO_.data());
+  fillFlagArray(flags, 60,  3, FLAG_CCBUSY_.data());
+  fillFlagArray(flags, 56,  3, FLAG_HITPAT_CC_.data());
+  fillFlagArray(flags, 52,  4, FLAG_HITPAT_.data());
+  fillFlagArray(flags, 48,  4, FLAG_FASTBGO_.data());
+  fillFlagArray(flags, 42,  1, FLAG_SEU_.data());
+  fillFlagArray(flags, 41,  1, FLAG_LCHK_.data());
+  fillFlagArray(flags, 40,  1, FLAG_CALMODE_.data());
+  fillFlagArray(flags,  8, 31, FLAG_TRIGPAT_.data());
+  FLAG_TRIG_[0] = static_cast<uint8_t>(flags&0x3fu);
+  LIVETIME_[0] = event.getLiveTime();
+  NUM_ASIC_[0] = event.getNumberOfHitASICs();
+  copyVectorToArray(event.getRawASICData(), RAW_ASIC_DATA_);
+  PROC_STATUS_[0] = event.getProcessStatus();
+  STATUS_[0] = event.getStatus();
+  
+  copyVectorToArray(event.getASICIDVector(), ASIC_ID_);
+  copyVectorToArray(event.getASICIDRemappedVector(), ASIC_ID_RMAP_);
+  copyVectorToArray(event.getChipDataBitVector(), ASIC_CHIP_);
+  copyVectorToArray(event.getTriggerVector(), ASIC_TRIG_);
+  copyVectorToArray(event.getSEUVector(), ASIC_SEU_);
+  copyVectorToArray(event.getChannelDataBitVector(), READOUT_FLAG_);
+  copyVectorToArray(event.getNumberOfHitChannelsVector(), NUM_READOUT_);
+  copyVectorToArray(event.getReferenceLevelVector(), ASIC_REF_);
+  copyVectorToArray(event.getCommonModeNoiseVector(), ASIC_CMN_);
+  
+  copyVectorToArray(event.getReadoutASICIDVector(), READOUT_ASIC_ID_);
+  copyVectorToArray(event.getReadoutChannelIDVector(), READOUT_ID_);
+  copyVectorToArray(event.getReadoutChannelIDRemappedVector(), READOUT_ID_RMAP_);
+  copyVectorToArray(event.getPHAVector(), PHA_);
+  copyVectorToArray(event.getEPIVector(), EPI_);
+
+  fitsfile* fits = fitsFile_;
+  int status = 0;
+  const long int row = rowIndex_;
+  const long int elem = 1;
+  fits_write_col(fits, TDOUBLE,   1, row, elem,  1, TIME_.data(),           &status);
+  fits_write_col(fits, TDOUBLE,   2, row, elem,  1, S_TIME_.data(),         &status);
+  fits_write_col(fits, TBYTE,     3, row, elem,  1, ADU_CNT_.data(),        &status);
+  fits_write_col(fits, TUINT,     4, row, elem,  1, L32TI_.data(),          &status);
+  fits_write_col(fits, TINT32BIT, 5, row, elem,  1, OCCURRENCE_ID_.data(),  &status);
+  fits_write_col(fits, TUINT,     6, row, elem,  1, LOCAL_TIME_.data(),     &status);
+  fits_write_col(fits, TBYTE,     7, row, elem,  1, CATEGORY_.data(),       &status);
+  fits_write_col(fits, TBIT,      8, row, elem, 64, FLAGS_.data(),          &status);
+  fits_write_col(fits, TBIT,      9, row, elem,  1, FLAG_LCHKMIO_.data(),   &status);
+  fits_write_col(fits, TBIT,     10, row, elem,  3, FLAG_CCBUSY_.data(),    &status);
+  fits_write_col(fits, TBIT,     11, row, elem,  3, FLAG_HITPAT_CC_.data(), &status);
+  fits_write_col(fits, TBIT,     12, row, elem,  4, FLAG_HITPAT_.data(),    &status);
+  fits_write_col(fits, TBIT,     13, row, elem,  4, FLAG_FASTBGO_.data(),   &status);
+  fits_write_col(fits, TBIT,     14, row, elem,  1, FLAG_SEU_.data(),       &status);
+  fits_write_col(fits, TBIT,     15, row, elem,  1, FLAG_LCHK_.data(),      &status);
+  fits_write_col(fits, TBIT,     16, row, elem,  1, FLAG_CALMODE_.data(),   &status);
+  fits_write_col(fits, TBIT,     17, row, elem, 31, FLAG_TRIGPAT_.data(),   &status);
+  fits_write_col(fits, TBYTE,    18, row, elem,  1, FLAG_TRIG_.data(),      &status);
+  fits_write_col(fits, TUINT,    19, row, elem,  1, LIVETIME_.data(),       &status);
+  fits_write_col(fits, TBYTE,    20, row, elem,  1, NUM_ASIC_.data(),       &status);
+
+  const std::size_t rawASICDataLength = event.getRawASICData().size();
+  fits_write_col(fits, TBYTE,    21, row, elem, rawASICDataLength, RAW_ASIC_DATA_.data(), &status);
+
+  fits_write_col(fits, TUINT,    22, row, elem,  1, PROC_STATUS_.data(),    &status);
+  fits_write_col(fits, TBYTE,    23, row, elem,  1, STATUS_.data(),         &status);
+
+  const std::size_t ASICDataLength = event.LengthOfASICData();
+  fits_write_col(fits, TSHORT,    24, row, elem, ASICDataLength, ASIC_ID_.data(),      &status);
+  fits_write_col(fits, TBYTE,     25, row, elem, ASICDataLength, ASIC_ID_RMAP_.data(), &status);
+  fits_write_col(fits, TBYTE,     26, row, elem, ASICDataLength, ASIC_CHIP_.data(),    &status);
+  fits_write_col(fits, TBYTE,     27, row, elem, ASICDataLength, ASIC_TRIG_.data(),    &status);
+  fits_write_col(fits, TBYTE,     28, row, elem, ASICDataLength, ASIC_SEU_.data(),     &status);
+  fits_write_col(fits, TLONGLONG, 29, row, elem, ASICDataLength, READOUT_FLAG_.data(), &status);
+  fits_write_col(fits, TSHORT,    30, row, elem, ASICDataLength, NUM_READOUT_.data(),  &status);
+  fits_write_col(fits, TSHORT,    31, row, elem, ASICDataLength, ASIC_REF_.data(),     &status);
+  fits_write_col(fits, TSHORT,    32, row, elem, ASICDataLength, ASIC_CMN_.data(),     &status);
+
+  const std::size_t ReadoutDataLength = event.LengthOfReadoutData();
+  fits_write_col(fits, TSHORT,   33, row, elem, ReadoutDataLength, READOUT_ASIC_ID_.data(), &status);
+  fits_write_col(fits, TBYTE,    34, row, elem, ReadoutDataLength, READOUT_ID_.data(),      &status);
+  fits_write_col(fits, TSHORT,   35, row, elem, ReadoutDataLength, READOUT_ID_RMAP_.data(), &status);
+  fits_write_col(fits, TSHORT,   36, row, elem, ReadoutDataLength, PHA_.data(),             &status);
+  fits_write_col(fits, TFLOAT,   37, row, elem, ReadoutDataLength, EPI_.data(),             &status);
+
+  rowIndex_++;
+}
+
+void EventFITSIOHelper::restoreEvent(long int row, sgd::Event& event)
+{
+  fitsfile* fits = fitsFile_;
+  int anynul = 0;
+  int status = 0;
+  const long int elem = 1;
+
+  fits_read_col(fits, TDOUBLE,   1, row, elem,  1, NULL, TIME_.data(),          &anynul, &status);
+  fits_read_col(fits, TDOUBLE,   2, row, elem,  1, NULL, S_TIME_.data(),        &anynul, &status);
+  fits_read_col(fits, TBYTE,     3, row, elem,  1, NULL, ADU_CNT_.data(),       &anynul, &status);
+  fits_read_col(fits, TUINT,     4, row, elem,  1, NULL, L32TI_.data(),         &anynul, &status);
+  fits_read_col(fits, TINT32BIT, 5, row, elem,  1, NULL, OCCURRENCE_ID_.data(), &anynul, &status);
+  fits_read_col(fits, TUINT,     6, row, elem,  1, NULL, LOCAL_TIME_.data(),    &anynul, &status);
+  fits_read_col(fits, TBYTE,     7, row, elem,  1, NULL, CATEGORY_.data(),      &anynul, &status);
+  fits_read_col(fits, TBIT,      8, row, elem, 64, NULL, FLAGS_.data(),         &anynul, &status);
+  fits_read_col(fits, TUINT,    19, row, elem,  1, NULL, LIVETIME_.data(),      &anynul, &status);
+  fits_read_col(fits, TBYTE,    20, row, elem,  1, NULL, NUM_ASIC_.data(),      &anynul, &status);
+
+  long int rawASICDataLength(0), rawASICDataOffset(0);
+  fits_read_descript(fits, 21, row, &rawASICDataLength, &rawASICDataOffset, &status);
+  fits_read_col(fits, TBYTE,    21, row, elem, rawASICDataLength, NULL, RAW_ASIC_DATA_.data(), &anynul, &status);
+
+  fits_read_col(fits, TUINT,    22, row, elem,  1, NULL, PROC_STATUS_.data(), &anynul, &status);
+  fits_read_col(fits, TBYTE,    23, row, elem,  1, NULL, STATUS_.data(),      &anynul, &status);
+
+  long int ASICDataLength(0), ASICDataOffset(0);
+  fits_read_descript(fits, 24, row, &ASICDataLength, &ASICDataOffset, &status);
+  fits_read_col(fits, TSHORT,    24, row, elem, ASICDataLength, NULL, ASIC_ID_.data(),      &anynul, &status);
+  fits_read_col(fits, TBYTE,     25, row, elem, ASICDataLength, NULL, ASIC_ID_RMAP_.data(), &anynul, &status);
+  fits_read_col(fits, TBYTE,     26, row, elem, ASICDataLength, NULL, ASIC_CHIP_.data(),    &anynul, &status);
+  fits_read_col(fits, TBYTE,     27, row, elem, ASICDataLength, NULL, ASIC_TRIG_.data(),    &anynul, &status);
+  fits_read_col(fits, TBYTE,     28, row, elem, ASICDataLength, NULL, ASIC_SEU_.data(),     &anynul, &status);
+  fits_read_col(fits, TLONGLONG, 29, row, elem, ASICDataLength, NULL, READOUT_FLAG_.data(), &anynul, &status);
+  fits_read_col(fits, TSHORT,    30, row, elem, ASICDataLength, NULL, NUM_READOUT_.data(),  &anynul, &status);
+  fits_read_col(fits, TSHORT,    31, row, elem, ASICDataLength, NULL, ASIC_REF_.data(),     &anynul, &status);
+  fits_read_col(fits, TSHORT,    32, row, elem, ASICDataLength, NULL, ASIC_CMN_.data(),     &anynul, &status);
+  
+  long int ReadoutDataLength(0), ReadoutDataOffset(0);
+  fits_read_descript(fits, 33, row, &ReadoutDataLength, &ReadoutDataOffset, &status);
+  fits_read_col(fits, TSHORT,   33, row, elem, ReadoutDataLength, NULL, READOUT_ASIC_ID_.data(), &anynul, &status);
+  fits_read_col(fits, TBYTE,    34, row, elem, ReadoutDataLength, NULL, READOUT_ID_.data(),       &anynul, &status);
+  fits_read_col(fits, TSHORT,   35, row, elem, ReadoutDataLength, NULL, READOUT_ID_RMAP_.data(), &anynul, &status);
+  fits_read_col(fits, TSHORT,   36, row, elem, ReadoutDataLength, NULL, PHA_.data(),             &anynul, &status);
+  fits_read_col(fits, TFLOAT,   37, row, elem, ReadoutDataLength, NULL, EPI_.data(),             &anynul, &status);
+  
+  event.setTime(TIME_[0]);
+  event.setSTime(S_TIME_[0]);
+  event.setADUCount(ADU_CNT_[0]);
+  event.setL32TI(L32TI_[0]);
+  event.setOccurrenceID(OCCURRENCE_ID_[0]);
+  event.setLocalTime(LOCAL_TIME_[0]);
+  event.setCategory(CATEGORY_[0]);
+  event.setFlags(convertFlags(FLAGS_.data()));
+  event.setLiveTime(LIVETIME_[0]);
+  event.setNumberOfHitASICs(NUM_ASIC_[0]);
+  event.setRawASICData(std::vector<uint8_t>(RAW_ASIC_DATA_.begin(),
+                                            RAW_ASIC_DATA_.begin()+rawASICDataLength));
+  event.setProcessStatus(PROC_STATUS_[0]);
+  event.setStatus(STATUS_[0]);
+  
+  const int NumASICs = ASICDataLength;
+  event.reserveASICData(NumASICs);
+  for (int i=0; i<NumASICs; i++) {
+    const int16_t ASIC_ID = ASIC_ID_[i];
+    const uint8_t ASIC_ID_remapped = ASIC_ID_RMAP_[i];
+    const uint8_t chipDataBit = ASIC_CHIP_[i];
+    const uint8_t trigger = ASIC_TRIG_[i];
+    const uint8_t SEU = ASIC_SEU_[i];
+    const uint64_t channelDataBit = READOUT_FLAG_[i];
+    const int16_t numberOfHitChannels = NUM_READOUT_[i];
+    const int16_t referenceLevel = ASIC_REF_[i];
+    const int16_t commonModeNoise = ASIC_CMN_[i];
+    event.pushASICData(ASIC_ID,
+                       ASIC_ID_remapped,
+                       chipDataBit,
+                       trigger,
+                       SEU,
+                       channelDataBit,
+                       numberOfHitChannels,
+                       referenceLevel,
+                       commonModeNoise);
+  }
+  
+  const int NumReadouts = ReadoutDataLength;
+  event.reserveReadoutData(NumReadouts);
+  for (int i=0; i<NumReadouts; i++) {
+    const int16_t ASIC_ID = READOUT_ASIC_ID_[i];
+    const uint8_t channelID = READOUT_ID_[i];
+    const int16_t channelID_remapped = READOUT_ID_RMAP_[i];
+    const int16_t PHA = PHA_[i];
+    const float EPI = EPI_[i];
+    event.pushReadoutData(ASIC_ID,
+                          channelID,
+                          channelID_remapped,
+                          PHA,
+                          EPI);
+  }
+}
+
+std::shared_ptr<sgd::Event> EventFITSIOHelper::getEvent(long int row)
+{
+  std::shared_ptr<sgd::Event> event = std::make_shared<sgd::Event>();
+  restoreEvent(row, *event);
+  return event;
+}
+
+bool EventFITSIOHelper::createFITSFile(const std::string& filename)
+{
+  int fitsStatus = 0;
+  fits_create_file(&fitsFile_, filename.c_str(), &fitsStatus);
+  fits_report_error(stderr, fitsStatus);
+  if (fitsStatus != 0) { return false; }
+  return true;
+}
+
+void EventFITSIOHelper::initializeFITSHeader()
+{
+  using boost::format;
+
+  int fitsStatus = 0;
+  fits_movabs_hdu(fitsFile_, 2, NULL, &fitsStatus);
+  fits_update_key_str(fitsFile_, "TELESCOP", "HITOMI", "", &fitsStatus);
+  fits_update_key_str(fitsFile_, "INSTRUME", (format("SGD%d")%unitID_).str().c_str(), "", &fitsStatus);
+  fits_update_key_str(fitsFile_, "DETNAM", (format("CC%d")%ccID_).str().c_str(), "", &fitsStatus);
+  fits_update_key_str(fitsFile_, "DATAMODE", (format("CC%d_NORMAL1")%ccID_).str().c_str(), "", &fitsStatus);
+  fits_update_key_str(fitsFile_, "DATE-OBS", "N/A", "", &fitsStatus);
+}
+
+void EventFITSIOHelper::initializeFITSTable(long int numberOfRows)
+{
+  int fitsStatus = 0;
+  
+  long naxis = 1;
+  long naxes[1] = { 0 };
+  fits_create_img(fitsFile_, USHORT_IMG, naxis, naxes, &fitsStatus);
+  fits_report_error(stderr, fitsStatus);
+  
+  const int NumColumns = 37;
+  const int TableType = BINARY_TBL;
+  const int tfields = NumColumns;
+  
+  char* ttype[NumColumns] = {
+    (char*) "TIME",            //  1
+    (char*) "S_TIME",          //  2
+    (char*) "ADU_CNT",         //  3
+    (char*) "L32TI",           //  4
+    (char*) "OCCURRENCE_ID",   //  5
+    (char*) "LOCAL_TIME",      //  6
+    (char*) "CATEGORY",        //  7
+    (char*) "FLAGS",           //  8
+    (char*) "FLAG_LCHKMIO",    //  9
+    (char*) "FLAG_CCBUSY",     // 10
+    (char*) "FLAG_HITPAT_CC",  // 11
+    (char*) "FLAG_HITPAT",     // 12
+    (char*) "FLAG_FASTBGO",    // 13
+    (char*) "FLAG_SEU",        // 14
+    (char*) "FLAG_LCHK",       // 15
+    (char*) "FLAG_CALMODE",    // 16
+    (char*) "FLAG_TRIGPAT",    // 17
+    (char*) "FLAG_TRIG",       // 18
+    (char*) "LIVETIME",        // 19
+    (char*) "NUM_ASIC",        // 20
+    (char*) "RAW_ASIC_DATA",   // 21
+    (char*) "PROC_STATUS",     // 22
+    (char*) "STATUS",          // 23
+    (char*) "A
