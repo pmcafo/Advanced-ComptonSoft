@@ -13,4 +13,65 @@
  * GNU General Public License for more details.                          *
  *                                                                       *
  * You should have received a copy of the GNU General Public License     *
- * along with this program.  If n
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+ *                                                                       *
+ *************************************************************************/
+
+#ifndef COMPTONSOFT_SXIXrayEvent_H
+#define COMPTONSOFT_SXIXrayEvent_H 1
+
+#include <list>
+#include <memory>
+#include <boost/multi_array.hpp>
+#include <vector>
+
+#include "XrayEvent.hh"
+
+namespace comptonsoft
+{
+
+/**
+ * A class of an X-ray event measured with an SXI CCD.
+ *
+ * @author Tsubasa Tamba
+ * @date 2019-06-03
+ * @date 2019-10-08 | Hirokazu Odaka | delete the assignment operators
+ */
+class SXIXrayEvent: public XrayEvent
+{
+public:
+  explicit SXIXrayEvent(int size);
+  virtual ~SXIXrayEvent();
+
+  SXIXrayEvent(const SXIXrayEvent& r) = default;
+  SXIXrayEvent(SXIXrayEvent&& r) = default;
+
+  void reduce() override;
+  void setOuterSplitThreshold(double v) { outerSplitThreshold_ = v; }
+  void determineAscaGrade();
+  double OuterSplitThreshold() const { return outerSplitThreshold_; }
+  int makeOuterMask (int innerGrade);
+  void classifyGrade();
+  double calculateSxiSumPH();
+  void calculateRank();
+  void calculateWeightAndModifyData();
+
+private:
+  SXIXrayEvent& operator=(const SXIXrayEvent& r) = delete;
+  SXIXrayEvent& operator=(SXIXrayEvent&& r) = delete;
+
+private:
+  double outerSplitThreshold_ = 0.0;
+  int sxiInnerGrade_ = 0;
+  int sxiOuterGrade_ = 0;
+  int sxiTotalGrade_ = 0;
+  int outerMask_ = 0;
+  int sxiOuterMaskedGrade_ = 0;
+  std::vector <double> dataVector_;
+};
+
+using SXIXrayEvent_sptr = std::shared_ptr<SXIXrayEvent>;
+
+} /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_SXIXrayEvent_H */
