@@ -296,4 +296,226 @@ void EventFITSIOHelper::initializeFITSTable(long int numberOfRows)
     (char*) "RAW_ASIC_DATA",   // 21
     (char*) "PROC_STATUS",     // 22
     (char*) "STATUS",          // 23
-    (char*) "A
+    (char*) "ASIC_ID",         // 24
+    (char*) "ASIC_ID_RMAP",    // 25
+    (char*) "ASIC_CHIP",       // 26
+    (char*) "ASIC_TRIG",       // 27
+    (char*) "ASIC_SEU",        // 28
+    (char*) "READOUT_FLAG",    // 29
+    (char*) "NUM_READOUT",     // 30
+    (char*) "ASIC_REF",        // 31
+    (char*) "ASIC_CMN",        // 32
+    (char*) "READOUT_ASIC_ID", // 33
+    (char*) "READOUT_ID",      // 34
+    (char*) "READOUT_ID_RMAP", // 35
+    (char*) "PHA",             // 36
+    (char*) "EPI",             // 37
+  };
+  
+  char* tform[NumColumns] = {
+    (char*) "1D", /* TIME */
+    (char*) "1D", /* S_TIME */
+    (char*) "1B", /* ADU_CNT */
+    (char*) "1V", /* L32TI */
+    (char*) "1J", /* OCCURRENCE_ID */
+    (char*) "1V", /* LOCAL_TIME */
+    (char*) "1B", /* CATEGORY */
+    (char*) "64X", /* FLAGS */
+    (char*) "1X", /* FLAG_LCHKMIO */
+    (char*) "3X", /* FLAG_CCBUSY */
+    (char*) "3X", /* FLAG_HITPAT_CC */
+    (char*) "4X", /* FLAG_HITPAT */
+    (char*) "4X", /* FLAG_FASTBGO */
+    (char*) "1X", /* FLAG_SEU */
+    (char*) "1X", /* FLAG_LCHK */
+    (char*) "1X", /* FLAG_CALMODE */
+    (char*) "31X", /* FLAG_TRIGPAT */
+    (char*) "1B", /* FLAG_TRIG */
+    (char*) "1V", /* LIVETIME */
+    (char*) "1B", /* NUM_ASIC */
+    (char*) "1PB(19552)", /* RAW_ASIC_DATA */
+    (char*) "32X", /* PROC_STATUS */
+    (char*) "8X", /* STATUS */
+    (char*) "1PI(208)", /* ASIC_ID */
+    (char*) "1PB(208)", /* ASIC_ID_RMAP */
+    (char*) "1PX(208)", /* ASIC_CHIP */
+    (char*) "1PX(208)", /* ASIC_TRIG */
+    (char*) "1PX(208)", /* ASIC_SEU */
+    (char*) "1PK(208)", /* READOUT_FLAG */
+    (char*) "1PI(208)", /* NUM_READOUT */
+    (char*) "1PI(208)", /* ASIC_REF */
+    (char*) "1PI(208)", /* ASIC_CMN */
+    (char*) "1PI(13312)", /* READOUT_ASIC_ID */
+    (char*) "1PB(13312)", /* READOUT_ID */
+    (char*) "1PI(13312)", /* READOUT_ID_RMAP */
+    (char*) "1PI(13312)", /* PHA */
+    (char*) "1PE(13312)", /* EPI */
+  };
+  
+  char* tunit[NumColumns] = {
+    (char*) "", //  1
+    (char*) "", //  2
+    (char*) "", //  3
+    (char*) "", //  4
+    (char*) "", //  5
+    (char*) "", //  6
+    (char*) "", //  7
+    (char*) "", //  8
+    (char*) "", //  9
+    (char*) "", // 10
+    (char*) "", // 11
+    (char*) "", // 12
+    (char*) "", // 13
+    (char*) "", // 14
+    (char*) "", // 15
+    (char*) "", // 16
+    (char*) "", // 17
+    (char*) "", // 18
+    (char*) "", // 19
+    (char*) "", // 20
+    (char*) "", // 21
+    (char*) "", // 22
+    (char*) "", // 23
+    (char*) "", // 24
+    (char*) "", // 25
+    (char*) "", // 26
+    (char*) "", // 27
+    (char*) "", // 28
+    (char*) "", // 29
+    (char*) "", // 30
+    (char*) "", // 31
+    (char*) "", // 32
+    (char*) "", // 33
+    (char*) "", // 34
+    (char*) "", // 35
+    (char*) "", // 36
+    (char*) "", // 37
+  };
+  
+  char extname[] = "EVENTS";
+  fits_create_tbl(fitsFile_, TableType, numberOfRows, tfields, ttype, tform, tunit, extname, &fitsStatus);
+  fits_report_error(stderr, fitsStatus);
+
+  initializeFITSHeader();
+  fits_report_error(stderr, fitsStatus);
+
+  // Move to the table HDU.
+  fits_movabs_hdu(fitsFile_, 2, NULL, &fitsStatus);
+  fits_report_error(stderr, fitsStatus);
+  
+#define FILL_FITS_HEADER_ 0
+#if FILL_FITS_HEADER_
+  // Register the common header keywords.
+  AHCommonKeys commonHeaderKeywords;
+  setCommonKeys(&commonHeaderKeywords);
+  commonHeaderKeywords.instrume = const_cast<char*>(instrumentName.c_str());
+  commonHeaderKeywords.detnam = const_cast<char*>(detectorName.c_str());
+  commonHeaderKeywords.datamode = const_cast<char*>(dataMode.c_str());
+  
+  // Write primary header keywords
+  fits_movabs_hdu(file, 1, NULL, &fitsStatus);
+  writePrimaryHeader(file, &commonHeaderKeywords);
+  
+  // Write event extension header keywords
+  fits_movabs_hdu(file, 2, NULL, &fitsStatus);
+  writeEventHeader(file, &commonHeaderKeywords);
+
+  // Expand header keyword space.
+  const int nAdditionalKeywords=100;
+	fits_set_hdrsize(file, nAdditionalKeywords, &fitsStatus );
+	this->reportErrorThenQuitIfError(fitsStatus, __func__);
+#endif /* FILL_FITS_HEADER_ */
+}
+
+bool EventFITSIOHelper::openFITSFile(const std::string& filename)
+{
+  int fitsStatus = 0;
+  fits_open_table(&fitsFile_, filename.c_str(), READONLY, &fitsStatus);
+  fits_report_error(stderr, fitsStatus);
+  if (fitsStatus != 0) { return false; }
+  return true;
+}
+
+long int EventFITSIOHelper::NumberOfRows()
+{
+  long nrows = 0;
+  int fitsStatus = 0;
+  fits_get_num_rows(fitsFile_, &nrows, &fitsStatus);
+  return nrows;
+}
+
+void EventFITSIOHelper::closeFITSFile()
+{
+  int status = 0;
+  fits_close_file(fitsFile_, &status);
+  fits_report_error(stderr, status);
+}
+
+/********************************
+ * EventFITSWriter
+ *******************************/
+EventFITSWriter::EventFITSWriter()
+  : io_(new EventFITSIOHelper)
+{
+}
+  
+EventFITSWriter::~EventFITSWriter() = default;
+
+bool EventFITSWriter::open(const std::string& filename)
+{
+  bool status = true;
+  status = io_->createFITSFile(filename);
+  if (!status) { return status; }
+  io_->initializeFITSTable();
+  return status;
+}
+
+void EventFITSWriter::fillEvent(const sgd::Event& event)
+{
+  io_->fillEvent(event);
+}
+
+void EventFITSWriter::close()
+{
+  io_->closeFITSFile();
+}
+
+
+/********************************
+ * EventFITSReader
+ *******************************/
+
+EventFITSReader::EventFITSReader()
+  : io_(new EventFITSIOHelper)
+{
+}
+
+EventFITSReader::~EventFITSReader() = default;
+
+bool EventFITSReader::open(const std::string& filename)
+{
+  return io_->openFITSFile(filename);
+}
+
+long int EventFITSReader::NumberOfRows()
+{
+  return io_->NumberOfRows();
+}
+  
+void EventFITSReader::restoreEvent(long int row, sgd::Event& event)
+{
+  io_->restoreEvent(row, event);
+}
+  
+std::shared_ptr<sgd::Event> EventFITSReader::getEvent(long int row)
+{
+  return io_->getEvent(row);
+}
+
+void EventFITSReader::close()
+{
+  io_->closeFITSFile();
+}
+
+} // namespace sgd
+} // namespace astroh
