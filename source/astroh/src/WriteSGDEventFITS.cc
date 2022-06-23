@@ -17,12 +17,12 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteHXIEventFITS.hh"
+#include "WriteSGDEventFITS.hh"
 #include "InitialInformation.hh"
 #include "AstroUnits.hh"
 #include "ChannelID.hh"
-#include "HXIEvent.hh"
-#include "HXIEventFITS.hh"
+#include "SGDEvent.hh"
+#include "SGDEventFITS.hh"
 #include "ReadoutModule.hh"
 #include "DetectorHit.hh"
 #include "CSHitCollection.hh"
@@ -34,23 +34,39 @@ namespace unit = anlgeant4::unit;
 namespace
 {
 
+int16_t getASICID(int readoutModuleID, int section)
+{
+  constexpr uint16_t NumTrayInADB = 7;
+  const uint16_t ADBNo = readoutModuleID/NumTrayInADB;
+  const uint16_t TrayNo = readoutModuleID%NumTrayInADB;
+  const uint16_t ASICIndex = section;
+  return astroh::sgd::Event::makeASICID(ADBNo, TrayNo, ASICIndex);
+}
+
 void fillHits(int64_t occurrenceID,
               const std::vector<comptonsoft::DetectorHit_sptr>& hits,
-              astroh::hxi::Event* event)
+              astroh::sgd::Event* event)
 {
   event->setOccurrenceID(occurrenceID);
+  astroh::sgd::EventFlags flags = event->getFlags();
   for (auto& hit: hits) {
     const int readoutModuleID = hit->ReadoutModuleID();
     const int section = hit->ReadoutSection();
     const int channelID = hit->ReadoutChannel();
-    const int16_t ASIC_ID = astroh::hxi::Event::makeASICID(readoutModuleID, section);
-    const int16_t channelID_remapped = astroh::hxi::Event::makeRemappedReadoutID(ASIC_ID, channelID);
+    const int16_t ASIC_ID = getASICID(readoutModuleID, section);
+    const int16_t ASIC_ID_remapped = astroh::sgd::Event::convertToRemapedASICID(ASIC_ID);
+    const int16_t channelID_remapped = astroh::sgd::Event::makeRemappedReadoutID(ASIC_ID_remapped, channelID);
     event->pushReadoutData(ASIC_ID,
                            channelID,
                            channelID_remapped,
                            hit->PHA(),
                            hit->EPI()/unit::keV);
+    if (hit->SelfTriggered()) {
+      const int triggerIndex = readoutModuleID;
+      flags.addTriggerPatternByIndex(triggerIndex);
+    }
   }
+  event->setFlags(flags);
 }
 
 } /* anonymous namespace */
@@ -59,24 +75,28 @@ void fillHits(int64_t occurrenceID,
 namespace comptonsoft
 {
 
-WriteHXIEventFITS::WriteHXIEventFITS()
+WriteSGDEventFITS::WriteSGDEventFITS()
   : m_Filename("event.fits"),
+    m_SGDID(0),
+    m_CCID(0),
     m_HitCollection(nullptr),
     m_InitialInfo(nullptr),
-    m_EventWriter(new astroh::hxi::EventFITSWriter)
+    m_EventWriter(new astroh::sgd::EventFITSWriter)
 {
 }
 
-WriteHXIEventFITS::~WriteHXIEventFITS() = default;
+WriteSGDEventFITS::~WriteSGDEventFITS() = default;
 
-ANLStatus WriteHXIEventFITS::mod_define()
+ANLStatus WriteSGDEventFITS::mod_define()
 {
   register_parameter(&m_Filename, "filename");
+  register_parameter(&m_SGDID, "sgd");
+  register_parameter(&m_CCID, "cc");
 
   return AS_OK;
 }
 
-ANLStatus WriteHXIEventFITS::mod_initialize()
+ANLStatus WriteSGDEventFITS::mod_initialize()
 {
   VCSModule::mod_initialize();
 
@@ -85,8 +105,9 @@ ANLStatus WriteHXIEventFITS::mod_initialize()
     get_module_IF("InitialInformation", &m_InitialInfo);
   }
 
-  define_evs("WriteHXIEventFITS:Fill");
+  define_evs("WriteSGDEventFITS:Fill");
 
+  m_EventWriter->setSGDIDs(m_SGDID, m_CCID);
   if (!(m_EventWriter->open(m_Filename))) {
     return AS_QUIT_ERROR;
   }
@@ -94,7 +115,7 @@ ANLStatus WriteHXIEventFITS::mod_initialize()
   return AS_OK;
 }
 
-ANLStatus WriteHXIEventFITS::mod_analyze()
+ANLStatus WriteSGDEventFITS::mod_analyze()
 {
   int64_t eventID = -1;
   if (m_InitialInfo) {
@@ -109,7 +130,7 @@ ANLStatus WriteHXIEventFITS::mod_analyze()
     const std::vector<DetectorHit_sptr>& hits
       = m_HitCollection->getHits(timeGroup);
     if (hits.size() > 0) {
-      astroh::hxi::Event event;
+      astroh::sgd::Event event;
       int32_t occurrenceID = eventID + 1;
       if (timeGroup>0) {
         occurrenceID = -1*timeGroup;
@@ -117,14 +138,14 @@ ANLStatus WriteHXIEventFITS::mod_analyze()
       
       fillHits(occurrenceID, hits, &event);
       m_EventWriter->fillEvent(event);
-      set_evs("WriteHXIEventFITS:Fill");
+      set_evs("WriteSGDEventFITS:Fill");
     }
   }
 
   return AS_OK;
 }
 
-ANLStatus WriteHXIEventFITS::mod_finalize()
+ANLStatus WriteSGDEventFITS::mod_finalize()
 {
   m_EventWriter->close();
   return AS_OK;
