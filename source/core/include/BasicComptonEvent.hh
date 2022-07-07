@@ -207,4 +207,63 @@ private:
   int hit1ID_ = 0;
   uint32_t hit1Process_ = 0;
   DetectorBasedChannelID hit1DetectorChannelID_;
-  ReadoutBasedChannelID hit1ReadoutChannelID_
+  ReadoutBasedChannelID hit1ReadoutChannelID_;
+  VoxelID hit1Voxel_{0, 0, 0};
+  double hit1Time_ = 0.0;
+  vector3_t hit1Position_{0.0, 0.0, 0.0};
+  double hit1Energy_ = 0.0;
+  double hit1TimeError_ = 0.0;
+  vector3_t hit1PositionError_{0.0, 0.0, 0.0};
+  double hit1EnergyError_ = 0.0;
+
+  int hit2ID_ = 0;
+  uint32_t hit2Process_ = 0;
+  DetectorBasedChannelID hit2DetectorChannelID_;
+  ReadoutBasedChannelID hit2ReadoutChannelID_;
+  VoxelID hit2Voxel_{0, 0, 0};
+  double hit2Time_ = 0.0;
+  vector3_t hit2Position_{0.0, 0.0, 0.0};
+  double hit2Energy_ = 0.0;
+  double hit2TimeError_ = 0.0;
+  vector3_t hit2PositionError_{0.0, 0.0, 0.0};
+  double hit2EnergyError_ = 0.0;
+
+  uint64_t flags_ = 0ul;
+
+  uint64_t hitpattern_ = 0ul;
+  int32_t grade_ = 0;
+  double likelihood_ = 0.0;
+
+  mutable bool bCalc_ = false;
+  mutable double cosThetaE_ = 1.0;
+  mutable double thetaE_ = 0.0;
+  mutable double thetaG_ = 0.0;
+  mutable double deltaTheta_ = 0.0;
+  mutable double phiG_ = 0.0;
+  mutable vector3_t coneAxis_{0.0, 0.0, 1.0};
+
+  bool sourceDistant_ = true;
+  vector3_t sourceDirection_{0.0, 0.0, 1.0};
+  vector3_t sourcePosition_{0.0, 0.0, 0.0};
+
+  bool escapeFlag_ = false;
+  double totalEnergyDeposit_ = 0.0;
+  int reconstructedOrder_ = 0;
+  double reconstructionFraction_ = 1.0;
+};
+
+template <typename T>
+bool filter_compton(T (BasicComptonEvent::*getter)() const,
+                    const BasicComptonEvent& event,
+                    T min, T max)
+{
+  return min <= (event.*getter)() && (event.*getter)() <= max;
+}
+
+using BasicComptonEvent_sptr = std::shared_ptr<BasicComptonEvent>;
+using const_BasicComptonEvent_sptr = std::shared_ptr<const BasicComptonEvent>;
+using BasicComptonEventVector = std::vector<std::shared_ptr<BasicComptonEvent>>;
+
+} /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_BasicComptonEvent_H */
