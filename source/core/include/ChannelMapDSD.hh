@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ChannelMap_H
-#define COMPTONSOFT_ChannelMap_H 1
+#ifndef COMPTONSOFT_ChannelMapDSD_H
+#define COMPTONSOFT_ChannelMapDSD_H 1
 
 #include "VChannelMap.hh"
 
@@ -28,29 +28,28 @@ namespace comptonsoft {
  * Readout channel map class.
  *
  * @author Hirokazu Odaka
- * @date 2008-08-28
- * @date 2014-09-18 | bidirectional mapping.
- * @date 2015-02-08 | derived from VChannalMap.
+ * @date 2015-02-08 | derived from VChannelMap.
  */
-class ChannelMap : public VChannelMap
+class ChannelMapDSD : public VChannelMap
 {
 public:
-  ChannelMap(std::size_t num_sections, std::size_t num_channels,
-             std::size_t num_x, std::size_t num_y);
-  virtual ~ChannelMap();
+  ChannelMapDSD(std::size_t num_sections, std::size_t num_channels,
+                std::size_t num_x, std::size_t num_y);
+  virtual ~ChannelMapDSD();
 
-  ChannelMap(const ChannelMap&) = default;
-  ChannelMap(ChannelMap&&) = default;
-  ChannelMap& operator=(const ChannelMap&) = default;
-  ChannelMap& operator=(ChannelMap&&) = default;
+  ChannelMapDSD(const ChannelMapDSD&) = default;
+  ChannelMapDSD(ChannelMapDSD&&) = default;
+  ChannelMapDSD& operator=(const ChannelMapDSD&) = default;
+  ChannelMapDSD& operator=(ChannelMapDSD&&) = default;
 
   std::size_t NumX() const override
   {
-    return tableToChannel_.size();
+    return tableToChannelX_.size();
   }
+
   std::size_t NumY() const override
   {
-    return tableToChannel_[0].size();
+    return tableToChannelY_.size();
   }
 
   /** 
@@ -59,11 +58,7 @@ public:
    * @param channel channel index.
    * @param pixel mapped pixel or strip pair.
    */
-  void set(int section, int channel, const PixelID& pixel) override
-  {
-    VChannelMap::set(section, channel, pixel);
-    tableToChannel_[pixel.X()][pixel.Y()] = SectionChannelPair{section, channel};
-  }
+  void set(int section, int index, const PixelID& pixel) override;
 
   /** 
    * map a section index and channel index to a strip pair
@@ -72,22 +67,16 @@ public:
    * @param x mapped pixel/strip index along x-axis.
    * @param y mapped pixel/strip index along y-axis.
    */
-  void set(int section, int channel, int x, int y) override
-  {
-    VChannelMap::set(section, channel, x, y);
-    tableToChannel_[x][y] = SectionChannelPair{section, channel};
-  }
+  void set(int section, int index, int x, int y) override;
 
-  SectionChannelPair getSectionChannel(int x, int y) const override
-  { return tableToChannel_[x][y]; }
-
-  SectionChannelPair getSectionChannel(const PixelID& pixel) const override
-  { return tableToChannel_[pixel.X()][pixel.Y()]; }
+  SectionChannelPair getSectionChannel(int x, int y) const override;
+  SectionChannelPair getSectionChannel(const PixelID& pixel) const override;
 
 private:
-  std::vector<std::vector<SectionChannelPair>> tableToChannel_;
+  std::vector<SectionChannelPair> tableToChannelX_;
+  std::vector<SectionChannelPair> tableToChannelY_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ChannelMap_H */
+#endif /* COMPTONSOFT_ChannelMapDSD_H */
