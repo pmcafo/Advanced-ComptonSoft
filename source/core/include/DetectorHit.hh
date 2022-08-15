@@ -152,4 +152,206 @@ public:
   { realPosition_.set(x, y, z); }
   void setRealPosition(const vector3_t& v) { realPosition_ = v; }
   double RealPositionX() const { return realPosition_.x(); }
-  double RealPositionY() const { return realP
+  double RealPositionY() const { return realPosition_.y(); }
+  double RealPositionZ() const { return realPosition_.z(); }
+  vector3_t RealPosition() const { return realPosition_; }
+
+  void setEnergyDeposit(double v) { energyDeposit_ = v; }
+  double EnergyDeposit() const { return energyDeposit_; }
+  void setEnergyCharge(double v) { energyCharge_ = v; }
+  double EnergyCharge() const { return energyCharge_; }
+
+  void setProcess(uint32_t v) { process_ = v; }
+  uint32_t Process() const { return process_; }
+  void addProcess(uint32_t f) { process_ |= f; }
+  void clearProcess(uint32_t f) { process_ &= ~f; }
+  bool isProcess(uint32_t f) const { return (process_&f)==f; }
+
+  void setSelfTriggered(bool v);
+  bool SelfTriggered() const { return isFlags(flag::SelfTriggered); }
+
+  void setTriggered(bool v);
+  bool Triggered() const { return isFlags(flag::Triggered); }
+
+  void setSelfTriggeredTime(double v) { selfTriggeredTime_ = v; }
+  double SelfTriggeredTime() const { return selfTriggeredTime_; }
+
+  void setTriggeredTime(double v) { triggeredTime_ = v; }
+  double TriggeredTime() const { return triggeredTime_; }
+
+  void setEnergy(double v) { energy_ = v; }
+  double Energy() const { return energy_; }
+  void setEnergyError(double v) { energyError_ = v; }
+  double EnergyError() const { return energyError_; }
+
+  void setPosition(double x, double y, double z) { position_.set(x, y, z); }
+  void setPosition(const vector3_t& v) { position_ = v; }
+  double PositionX() const { return position_.x(); }
+  double PositionY() const { return position_.y(); }
+  double PositionZ() const { return position_.z(); }
+  vector3_t Position() const { return position_; }
+
+  void setPositionError(double x, double y, double z) { positionError_.set(x, y, z); }
+  void setPositionError(const vector3_t& v) { positionError_ = v; }
+  double PositionErrorX() const { return positionError_.x(); }
+  double PositionErrorY() const { return positionError_.y(); }
+  double PositionErrorZ() const { return positionError_.z(); }
+  vector3_t PositionError() const { return positionError_; }
+
+  void setLocalPosition(double x, double y, double z) { localPosition_.set(x, y, z); }
+  void setLocalPosition(const vector3_t& v) { localPosition_ = v; }
+  double LocalPositionX() const { return localPosition_.x(); }
+  double LocalPositionY() const { return localPosition_.y(); }
+  double LocalPositionZ() const { return localPosition_.z(); }
+  vector3_t LocalPosition() const { return localPosition_; }
+
+  void setLocalPositionError(double x, double y, double z) { localPositionError_.set(x, y, z); }
+  void setLocalPositionError(const vector3_t& v) { localPositionError_ = v; }
+  double LocalPositionErrorX() const { return localPositionError_.x(); }
+  double LocalPositionErrorY() const { return localPositionError_.y(); }
+  double LocalPositionErrorZ() const { return localPositionError_.z(); }
+  vector3_t LocalPositionError() const { return localPositionError_; }
+
+  void setTime(double v) { time_ = v; }
+  double Time() const { return time_; }
+  void setTimeError(double v) { time_error_ = v; }
+  double TimeError() const { return time_error_; }
+
+  void setGrade(int v) { grade_ = v; }
+  int Grade() const { return grade_; }
+
+  void setDepthSensingMode(int v) { depthSensingMode_ = v; }
+  int DepthSensingMode() const { return depthSensingMode_; }
+  
+  /**
+   * check if the given hit occurred in the same detector.
+   */
+  bool isInSameDetector(const DetectorHit& r) const;
+
+  /**
+   * check if the given hit occurred in the same voxel, pixel or strip.
+   */
+  bool isInSameVoxel(const DetectorHit& r) const;
+  bool isInSamePixel(const DetectorHit& r) const { return isInSameVoxel(r); }
+
+  /**
+   * check if the given hit occurred in adjacent pixels (or strips).
+   * @param r a hit to be checked.
+   * @param contact if true then the adjacent pixels should share the sides.
+   * otherwise, the pixels can share just an apex.
+   * @return result
+   */
+  bool isAdjacent(const DetectorHit& r, bool contact=true) const;
+  
+  double distance(const DetectorHit& r) const
+  { return distance(r.Position()); }
+  double distance(const vector3_t& v) const
+  { return (Position()-v).mag(); }
+  double distance2(const DetectorHit& r) const
+  { return distance2(r.Position()); }
+  double distance2(const vector3_t& v) const
+  { return (Position()-v).mag2(); }
+
+  bool isXStrip() const
+  { return Voxel().isXStrip(); }
+  bool isYStrip() const
+  { return Voxel().isYStrip(); }
+  bool isPixel() const
+  { return Voxel().isPixel(); }
+  bool isVoxel() const
+  { return Voxel().isVoxel(); }
+
+  /**
+   * merge the given hit to this object. This method is used for merging
+   * two physical hits in a pixel in Monte Carlo simulations.
+   */
+  DetectorHit& merge(const DetectorHit& r);
+
+  /**
+   * merge the given hit signal occurring in an adjacent pixel.
+   */
+  DetectorHit& mergeAdjacentSignal(const DetectorHit& r,
+                                   MergedPosition mergedPosition,
+                                   bool setClusteredFlag=true);
+
+  // override new/delete operators
+  // by using boost::pool library for fast memory allocation
+#if DetectorHit_BoostPool
+  void* operator new(size_t);
+  void operator delete(void*);
+#endif
+
+private:
+  // Event/track ID
+  int64_t eventID_ = 0l;
+  int trackID_ = 0;
+  // measured data
+  int64_t ti_ = 0l;
+  int instrumentID_ = 0;
+  DetectorBasedChannelID detectorChannelID_;
+  ReadoutBasedChannelID readoutChannelID_;
+  VoxelID voxel_;
+  int32_t rawPHA_ = 0;
+  double PHA_ = 0.0;
+  double EPI_ = 0.0;
+  double EPIError_ = 0.0;
+  uint64_t flagData_ = 0ul;
+  uint64_t flags_ = 0ul;
+  // simulation
+  int particle_ = 0;
+  double realTime_ = 0.0;
+  int timeGroup_ = 0;
+  vector3_t realPosition_{0.0, 0.0, 0.0};
+  double energyDeposit_ = 0.0;
+  double energyCharge_ = 0.0;
+  uint32_t process_ = 0u;
+  // trigger information
+  double selfTriggeredTime_ = 0.0;
+  double triggeredTime_ = 0.0;
+  // reconstructed
+  double energy_ = 0.0;
+  double energyError_ = 0.0;
+  vector3_t position_{0.0, 0.0, 0.0};
+  vector3_t positionError_{0.0, 0.0, 0.0};
+  vector3_t localPosition_{0.0, 0.0, 0.0};
+  vector3_t localPositionError_{0.0, 0.0, 0.0};
+  double time_ = 0.0;
+  double time_error_ = 0.0;
+  int grade_ = 0;
+  int depthSensingMode_ = 0;
+};
+
+inline bool DetectorHit::isInSameDetector(const DetectorHit& r) const
+{
+  return ( TimeGroup() == r.TimeGroup()
+           && InstrumentID() == r.InstrumentID()
+           && DetectorID() == r.DetectorID() );
+}
+
+inline bool DetectorHit::isInSameVoxel(const DetectorHit& r) const
+{
+  return ( isInSameDetector(r) && Voxel() == r.Voxel() );
+}
+
+// override new/delete operators
+// by using boost::pool library for fast memory allocation
+#if DetectorHit_BoostPool
+extern boost::pool<> DetectorHitAllocator;
+
+inline
+void* DetectorHit::operator new(size_t)
+{
+  void *aHit = (void*)DetectorHitAllocator.malloc();
+  return aHit;
+}
+
+inline
+void DetectorHit::operator delete(void *aHit)
+{
+  if (aHit != 0) DetectorHitAllocator.free(aHit);
+}
+#endif
+
+} /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_DetectorHit_H */
