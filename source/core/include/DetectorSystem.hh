@@ -263,4 +263,78 @@ private:
                              bool isSensitiveDetector);
   void setupDetectorParameters(const DetectorSystem::ParametersNodeContents parameters,
                                VRealDetectorUnit* detector);
-  void setupDetectorParameters(const DetectorSystem::ParametersNodeContents parameter
+  void setupDetectorParameters(const DetectorSystem::ParametersNodeContents parameters,
+                               DeviceSimulation* ds);
+  void setupReconstructionParameters(const DetectorSystem::ParametersNodeContents parameters,
+                                     VRealDetectorUnit* detector);
+  
+private:
+  bool MCSimulation_;
+  bool simAutoPosition_;
+  bool simSDCheck_;
+
+  bool detectorConstructed_;
+  std::vector<std::unique_ptr<VRealDetectorUnit>> detectors_;
+  std::vector<std::unique_ptr<ReadoutModule>> readoutModules_;
+  std::map<int, int> detectorIDMap_;
+  std::map<int, int> readoutModuleIDMap_;
+
+  std::vector<DeviceSimulation*> deviceSimulationVector_;
+  std::vector<VCSSensitiveDetector*> sensitiveDetectorVector_;
+  std::unique_ptr<TFile> ROOTFile_;
+
+  std::map<std::string, std::unique_ptr<DetectorGroup>> detectorGroupMap_;
+  std::vector<HitPattern> hitPatterns_;
+  
+private:
+  DetectorSystem(const DetectorSystem&) = delete;
+  DetectorSystem(DetectorSystem&&) = delete;
+  DetectorSystem& operator=(const DetectorSystem&) = delete;
+  DetectorSystem& operator=(DetectorSystem&&) = delete;
+};
+
+inline VRealDetectorUnit* DetectorSystem::getDetectorByID(int id)
+{
+  auto it = detectorIDMap_.find(id);
+  if (it==detectorIDMap_.end()) { return nullptr; }
+  return getDetectorByIndex((*it).second);
+}
+
+inline const VRealDetectorUnit* DetectorSystem::getDetectorByID(int id) const
+{
+  auto it = detectorIDMap_.find(id);
+  if (it==detectorIDMap_.end()) { return nullptr; }
+  return getDetectorByIndex((*it).second);
+}
+
+inline ReadoutModule* DetectorSystem::getReadoutModuleByID(int id)
+{
+  auto it = readoutModuleIDMap_.find(id);
+  if (it==readoutModuleIDMap_.end()) { return nullptr; }
+  return getReadoutModuleByIndex((*it).second);
+}
+
+inline const ReadoutModule* DetectorSystem::getReadoutModuleByID(int id) const
+{
+  auto it = readoutModuleIDMap_.find(id);
+  if (it==readoutModuleIDMap_.end()) { return nullptr; }
+  return getReadoutModuleByIndex((*it).second);
+}
+
+inline DeviceSimulation* DetectorSystem::getDeviceSimulationByID(int id)
+{
+  auto it = detectorIDMap_.find(id);
+  if (it==detectorIDMap_.end()) { return nullptr; }
+  return getDeviceSimulationByIndex((*it).second);
+}
+
+inline const DeviceSimulation* DetectorSystem::getDeviceSimulationByID(int id) const
+{
+  auto it = detectorIDMap_.find(id);
+  if (it==detectorIDMap_.end()) { return nullptr; }
+  return getDeviceSimulationByIndex((*it).second);
+}
+
+} /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_DetectorSystem_H */
