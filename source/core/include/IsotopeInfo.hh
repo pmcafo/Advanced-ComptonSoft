@@ -17,43 +17,70 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_GainFunctionSpline_H
-#define COMPTONSOFT_GainFunctionSpline_H 1
+/**
+ * @file IsotopeInfo.hh
+ * @brief header file of class IsotopeInfo
+ * @author Hirokazu Odaka
+ * @date 2016-05-04
+ */
 
-#include "VGainFunction.hh"
-#include <vector>
+#ifndef COMPTONSOFT_IsotopeInfo_H
+#define COMPTONSOFT_IsotopeInfo_H 1
 
-class TSpline;
+#include <cstdint>
 
 namespace comptonsoft {
 
 /**
- * A class of a gain correction function using a spline function.
+ * Isotope class.
  *
  * @author Hirokazu Odaka
- * @date 2014-09-12
- * @date 2020-03-26 | adapt a change of VGainFunction
+ * @date 2012-02-06
+ * @date 2016-05-08
+ * @date 2017-07-26 | add property floating level
  */
-class GainFunctionSpline : public VGainFunction
+class IsotopeInfo
 {
 public:
-  GainFunctionSpline();
-  virtual ~GainFunctionSpline();
+  static int64_t makeID(int z, int a, double energy, int floating_level=0);
 
-  GainFunctionSpline(const GainFunctionSpline&) = default;
-  GainFunctionSpline(GainFunctionSpline&&) = default;
-  GainFunctionSpline& operator=(const GainFunctionSpline& r) = default;
-  GainFunctionSpline& operator=(GainFunctionSpline& rr) = default;
+public:
+  IsotopeInfo();
+  explicit IsotopeInfo(int64_t isotopeID);
+  IsotopeInfo(int z, int a, double energy, int floating_level=0);
+  ~IsotopeInfo();
   
-  double RangeMin() const override;
-  double RangeMax() const override;
-  double eval(double x) const override;
-  void set(const TSpline* func);
+  IsotopeInfo(const IsotopeInfo&) = default;
+  IsotopeInfo(IsotopeInfo&&) = default;
+  IsotopeInfo& operator=(const IsotopeInfo&) = default;
+  IsotopeInfo& operator=(IsotopeInfo&&) = default;
+  
+  int Z() const { return Z_; }
+  int A() const { return A_; }
+  double Energy() const { return energy_; }
+  int FloatingLevel() const { return floating_level_; }
+  int Counts() const { return counts_; }
+  double Rate() const { return rate_; }
+
+  void setFloatingLevel(int v) { floating_level_ = v; }
+  
+  void setCounts(int v) { counts_ = v; }
+  void add1() { counts_++; }
+
+  void setRate(double v) { rate_ = v; }
+  void addRate(double v) { rate_ += v; }
+
+  int64_t IsotopeID() const;
 
 private:
-  const TSpline* func_;
+  int Z_;
+  int A_;
+  double energy_;
+  int floating_level_;
+  int counts_;
+  double rate_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_GainFunctionSpline_H */
+#endif /* COMPTONSOFT_IsotopeInfo_H */

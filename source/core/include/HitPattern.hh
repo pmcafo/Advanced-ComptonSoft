@@ -17,43 +17,66 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_GainFunctionSpline_H
-#define COMPTONSOFT_GainFunctionSpline_H 1
+#ifndef COMPTONSOFT_HitPattern_H
+#define COMPTONSOFT_HitPattern_H 1
 
-#include "VGainFunction.hh"
+#include <string>
 #include <vector>
-
-class TSpline;
+#include "DetectorHit_sptr.hh"
+#include "DetectorGroup.hh"
 
 namespace comptonsoft {
 
 /**
- * A class of a gain correction function using a spline function.
- *
+ * A class of a hit pattern.
+ * A hit pattern is defined as a list of a detector group.
  * @author Hirokazu Odaka
- * @date 2014-09-12
- * @date 2020-03-26 | adapt a change of VGainFunction
+ * @date 2008-10-22
  */
-class GainFunctionSpline : public VGainFunction
+class HitPattern
 {
 public:
-  GainFunctionSpline();
-  virtual ~GainFunctionSpline();
-
-  GainFunctionSpline(const GainFunctionSpline&) = default;
-  GainFunctionSpline(GainFunctionSpline&&) = default;
-  GainFunctionSpline& operator=(const GainFunctionSpline& r) = default;
-  GainFunctionSpline& operator=(GainFunctionSpline& rr) = default;
+  HitPattern() = default;
+  virtual ~HitPattern();
   
-  double RangeMin() const override;
-  double RangeMax() const override;
-  double eval(double x) const override;
-  void set(const TSpline* func);
+  const std::string& Name() const { return name_; }
+  const std::string& ShortName() const { return shortName_; }
+  void setName(const std::string& v) { name_ = v; }
+  void setShortName(const std::string& v) { shortName_ = v; }
+
+  unsigned int Bit() const { return bit_; }
+  void setBit(unsigned int bit) { bit_ = bit; }
+  
+  /**
+   * add a detector group to this hit pattern.
+   * @param dg a detector group
+  */
+  void add(const DetectorGroup& group) { groups_.push_back(group); }
+
+  /**
+   * check if the given hit vector matches this hit pattern.
+   * @param hitvec a hit vector to check
+   */
+  bool match(const std::vector<DetectorHit_sptr>& hits) const;
+
+  /**
+   * check if the given hit vector matches this hit pattern.
+   * @param idvec a vector of the detector IDs of a hit vector to check
+  */
+  bool match(const std::vector<int>& ids) const;
+
+  /**
+   * @return a number of hits to define this hit pattern.
+   */
+  int NumberOfHits() const { return groups_.size(); }
 
 private:
-  const TSpline* func_;
+  std::string name_;
+  std::string shortName_;
+  unsigned int bit_ = 0u;
+  std::vector<DetectorGroup> groups_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_GainFunctionSpline_H */
+#endif /* COMPTONSOFT_HitPattern_H */

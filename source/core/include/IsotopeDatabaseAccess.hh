@@ -17,43 +17,36 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_GainFunctionSpline_H
-#define COMPTONSOFT_GainFunctionSpline_H 1
+/**
+ * @file IsotopeDatabaseAccess.hh
+ * @brief header file of class IsotopeDatabaseAccess
+ * @author Hirokazu Odaka
+ * @date 2016-05-04
+ */
 
-#include "VGainFunction.hh"
-#include <vector>
+#ifndef COMPTONSOFT_IsotopeDatabaseAccess_H
+#define COMPTONSOFT_IsotopeDatabaseAccess_H 1
 
-class TSpline;
+#include "RIDecayCalculation.hh"
+#include "G4Ions.hh"
 
 namespace comptonsoft {
 
-/**
- * A class of a gain correction function using a spline function.
- *
- * @author Hirokazu Odaka
- * @date 2014-09-12
- * @date 2020-03-26 | adapt a change of VGainFunction
- */
-class GainFunctionSpline : public VGainFunction
+class IsotopeDatabaseAccess : private RIDecayCalculation
 {
 public:
-  GainFunctionSpline();
-  virtual ~GainFunctionSpline();
+  IsotopeDatabaseAccess() = default;
+  virtual ~IsotopeDatabaseAccess();
 
-  GainFunctionSpline(const GainFunctionSpline&) = default;
-  GainFunctionSpline(GainFunctionSpline&&) = default;
-  GainFunctionSpline& operator=(const GainFunctionSpline& r) = default;
-  GainFunctionSpline& operator=(GainFunctionSpline& rr) = default;
+  void initialize_data();
+  void retrive_isotope(int z, int a, double energy, int floating_level=0);
+  double get_lifetime() const;
+  double get_halflife() const;
   
-  double RangeMin() const override;
-  double RangeMax() const override;
-  double eval(double x) const override;
-  void set(const TSpline* func);
-
 private:
-  const TSpline* func_;
+  const G4Ions* ions_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_GainFunctionSpline_H */
+#endif /* COMPTONSOFT_IsotopeDatabaseAccess_H */

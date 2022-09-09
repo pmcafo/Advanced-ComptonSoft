@@ -17,43 +17,30 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_GainFunctionSpline_H
-#define COMPTONSOFT_GainFunctionSpline_H 1
+#ifndef COMPTONSOFT_HitTreeIOWithInitialInfo_H
+#define COMPTONSOFT_HitTreeIOWithInitialInfo_H 1
 
-#include "VGainFunction.hh"
-#include <vector>
-
-class TSpline;
+#include "HitTreeIO.hh"
+#include "InitialInfoTreeIO.hh"
 
 namespace comptonsoft {
 
 /**
- * A class of a gain correction function using a spline function.
- *
+ * 
  * @author Hirokazu Odaka
- * @date 2014-09-12
- * @date 2020-03-26 | adapt a change of VGainFunction
+ * @date 2014-12-02
  */
-class GainFunctionSpline : public VGainFunction
+class HitTreeIOWithInitialInfo : public HitTreeIO, public InitialInfoTreeIO
 {
 public:
-  GainFunctionSpline();
-  virtual ~GainFunctionSpline();
+  HitTreeIOWithInitialInfo() = default;
+  ~HitTreeIOWithInitialInfo();
 
-  GainFunctionSpline(const GainFunctionSpline&) = default;
-  GainFunctionSpline(GainFunctionSpline&&) = default;
-  GainFunctionSpline& operator=(const GainFunctionSpline& r) = default;
-  GainFunctionSpline& operator=(GainFunctionSpline& rr) = default;
-  
-  double RangeMin() const override;
-  double RangeMax() const override;
-  double eval(double x) const override;
-  void set(const TSpline* func);
-
-private:
-  const TSpline* func_;
+  void setTree(TTree* tree);
+  void defineBranches();
+  void setBranchAddresses();
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_GainFunctionSpline_H */
+#endif /* COMPTONSOFT_HitTreeIOWithInitialInfo_H */
