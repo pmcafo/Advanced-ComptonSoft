@@ -87,4 +87,233 @@ public:
 
   void resetNegativeThresholdEnergyVector(double val)
   { std::fill(negativeThresholdEnergyVector_.begin(), negativeThresholdEnergyVector_.end(), val); }
-  void setNegativeThresholdEnergy(std::size_t i, double val) { negativeThresh
+  void setNegativeThresholdEnergy(std::size_t i, double val) { negativeThresholdEnergyVector_[i] = val; }
+  void setNegativeThresholdEnergyVector(const std::vector<double>& v) { negativeThresholdEnergyVector_ = v; }
+  double getNegativeThresholdEnergy(std::size_t i) const { return negativeThresholdEnergyVector_[i]; }
+  void getNegativeThresholdEnergyVector(std::vector<double>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(negativeThresholdEnergyVector_.begin(), negativeThresholdEnergyVector_.end(), v.begin());
+  }
+
+  void setTime(double v) { time_ = v; }
+  double Time() const { return time_; }
+
+  void setFlags(uint64_t v) { flags_ = v; }
+  uint64_t Flags() const { return flags_; }
+
+  void resetChannelDisabledVector(int v=0)
+  { std::fill(channelDisabledVector_.begin(), channelDisabledVector_.end(), v); }
+  void setChannelDisabled(std::size_t i, int val) { channelDisabledVector_[i] = val; }
+  void setChannelDisabledVector(const std::vector<int8_t>& v) { channelDisabledVector_ = v; }
+  int getChannelDisabled(std::size_t i) const { return channelDisabledVector_[i]; }
+  void getChannelDisabledVector(std::vector<int>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(channelDisabledVector_.begin(), channelDisabledVector_.end(), v.begin());
+  }
+  bool getChannelEnabled(std::size_t i) const
+  {
+    const int status = channelDisabledVector_[i];
+    return (status==channel_status::normal) || (status==channel_status::trigger_disable);
+  }
+
+  void resetPedestalVector(double v=0.0)
+  { std::fill(pedestalVector_.begin(), pedestalVector_.end(), v); }
+  void setPedestal(std::size_t i, double val) { pedestalVector_[i] = val; }
+  void setPedestalVector(const std::vector<double>& v) { pedestalVector_ = v; }
+  double getPedestal(std::size_t i) const { return pedestalVector_[i]; }
+  void getPedestalVector(std::vector<double>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(pedestalVector_.begin(), pedestalVector_.end(), v.begin());
+  }
+
+  void resetGainFunctionVector(std::shared_ptr<VGainFunction> p=std::shared_ptr<VGainFunction>())
+  { std::fill(gainFunctionVector_.begin(), gainFunctionVector_.end(), p); }
+  void setGainFunction(std::size_t i, std::shared_ptr<VGainFunction> p)
+  { gainFunctionVector_[i] = p; }
+  void setGainFunctionVector(const std::vector<std::shared_ptr<VGainFunction>>& v)
+  { gainFunctionVector_ = v; }
+  std::shared_ptr<const VGainFunction> getGainFunction(std::size_t i) const
+  { return gainFunctionVector_[i]; }
+  void getGainFunctionVector(std::vector<std::shared_ptr<const VGainFunction>>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(gainFunctionVector_.begin(), gainFunctionVector_.end(), v.begin());
+  }
+
+  void resetDataValidVector(int valid)
+  { std::fill(dataValidVector_.begin(), dataValidVector_.end(), valid); }
+  void setDataValid(std::size_t i, int8_t val) { dataValidVector_[i] = val; }
+  void setDataValidVector(const std::vector<int8_t>& v) { dataValidVector_ = v; }
+  double getDataValid(std::size_t i) const { return dataValidVector_[i]; }
+  void getDataValidVector(std::vector<double>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(dataValidVector_.begin(), dataValidVector_.end(), v.begin());
+  }
+
+  void resetRawADCVector()
+  { std::fill(rawADCVector_.begin(), rawADCVector_.end(), 0.0); }
+  void setRawADC(std::size_t i, int val) { rawADCVector_[i] = val; }
+  void setRawADC(const int* a, int n)
+  { std::copy(a, a+n, rawADCVector_.begin()); }
+  void setRawADC(const short* a, int n)
+  { std::copy(a, a+n, rawADCVector_.begin()); }
+  void setRawADCVector(const std::vector<int32_t>& v) { rawADCVector_ = v; }
+  int getRawADC(std::size_t i) const { return rawADCVector_[i]; }
+  void getRawADCVector(std::vector<int>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(rawADCVector_.begin(), rawADCVector_.end(), v.begin());
+  }
+
+  void resetPHAVector()
+  { std::fill(PHAVector_.begin(), PHAVector_.end(), 0.0); }
+  void setPHA(std::size_t i, double val) { PHAVector_[i] = val; }
+  void setPHAVector(const std::vector<double>& v) { PHAVector_ = v; }
+  double getPHA(std::size_t i) const { return PHAVector_[i]; }
+  void getPHAVector(std::vector<double>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(PHAVector_.begin(), PHAVector_.end(), v.begin());
+  }
+
+  void resetEPIVector()
+  { std::fill(EPIVector_.begin(), EPIVector_.end(), 0.0); }
+  void setEPI(std::size_t i, double val) { EPIVector_[i] = val; }
+  void setEPIVector(const std::vector<double>& v) { EPIVector_ = v; }
+  double getEPI(std::size_t i) const { return EPIVector_[i]; }
+  void getEPIVector(std::vector<double>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(EPIVector_.begin(), EPIVector_.end(), v.begin());
+  }
+
+  void resetChannelHitVector()
+  { std::fill(channelHitVector_.begin(), channelHitVector_.end(), 0); }
+  void setChannelHit(std::size_t i, int8_t val) { channelHitVector_[i] = val; }
+  void setChannelHitVector(const std::vector<int8_t> v) { channelHitVector_ = v; }
+  int getChannelHit(std::size_t i) const { return channelHitVector_[i]; }
+  void getChannelHitVector(std::vector<int>& v) const
+  {
+    v.resize(NumChannels_);
+    std::copy(channelHitVector_.begin(), channelHitVector_.end(), v.begin());
+  }
+  
+  void setCommonModeNoise(double v) { commonModeNoise_ = v; }
+  double getCommonModeNoise() const { return commonModeNoise_; }
+
+  void setReferenceLevel(double v) { referenceLevel_ = v; }
+  double getReferenceLevel() const { return referenceLevel_; }
+
+  /**
+   * reset all event data (raw ADC, PHA, EPI, hit channels, common mode nose,
+   * reference) in this object.
+   * This method does not reset the data valid array.
+   */
+  void resetEventData()
+  {
+    time_ = 0.0;
+    flags_ = 0u;
+    resetRawADCVector();
+    resetPHAVector();
+    resetEPIVector();
+    resetChannelHitVector();
+    commonModeNoise_ = 0.0;
+    referenceLevel_ = 0.0;
+  }
+
+  /**
+   * copy Raw ADC values to the PHA array.
+   */
+  void copyToPHA()
+  { std::copy(rawADCVector_.begin(), rawADCVector_.end(), PHAVector_.begin()); }
+
+  /**
+   * randomize each PHA value in its bin to prevent discreteness.
+   */
+  void randomizePHAValues();
+
+  /**
+   * correct pedestal levels on the PHA array.
+   */
+  void correctPedestalLevel();
+
+  /**
+   * calcualte common mode noise from the PHA array by the median method.
+   * The calculated value is also set to _CommonModeNoise.
+   * @return common mode noise.
+   */
+  double calculateCommonModeNoiseByMedian();
+
+  /**
+   * calcualte common mode noise from the PHA array by the mean method.
+   * The calculated value is also set to _CommonModeNoise.
+   * @return common mode noise.
+   */
+  double calculateCommonModeNoiseByMean();
+
+  /**
+   * subtract common mode noise on the PHA array.
+   */
+  void subtractCommonModeNoise();
+ 
+  /**
+   * convert PHA values to EPI values according to a calibaration curve for all
+   * channels.
+   * @return true if successful
+   */
+  bool convertPHA2EPI();
+
+  /**
+   * convert a pha value to a pi value according to a calibaration curve.
+   * @param i channel ID
+   * @param pha PHA value
+   * @return EPI value
+   */
+  double PHA2EPI(std::size_t i, double pha) const;
+
+  /**
+   * select detector readout channels that have higher EPI values than the
+   * threshold energy.
+   * The results can be accessed via @link getHitChannel(int) @endlink.
+   */
+  void selectHits();
+
+  bool discriminate(std::size_t i, double energy) const;
+
+private:
+  MultiChannelData& operator=(const MultiChannelData&) = delete;
+  MultiChannelData& operator=(MultiChannelData&&) = delete;
+
+private:
+  const std::size_t NumChannels_;
+  const ElectrodeSide ElectrodeSide_;
+  
+  ReadoutBasedChannelID readoutID_;
+  bool prioritySide_;
+  bool useNegativePulse_;
+  std::vector<double> thresholdEnergyVector_;
+  std::vector<double> negativeThresholdEnergyVector_;
+
+  double time_ = 0.0;
+  uint64_t flags_ = 0u;
+
+  std::vector<int8_t> channelDisabledVector_;
+  std::vector<double> pedestalVector_;
+  std::vector<std::shared_ptr<VGainFunction>> gainFunctionVector_;
+
+  std::vector<int8_t> dataValidVector_;
+  std::vector<int32_t> rawADCVector_;
+  std::vector<double> PHAVector_;
+  std::vector<double> EPIVector_;
+  std::vector<int8_t> channelHitVector_;
+  double commonModeNoise_;
+  double referenceLevel_;
+};
+
+} /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_MultiChannelData_H */
