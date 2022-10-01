@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,59 +18,33 @@
  *                                                                       *
  *************************************************************************/
 
-/**
- * @file RateData.hh
- * @brief header file of class RateData
- * @author Hirokazu Odaka
- * @date 2016-05-04
- */
+#ifndef COMPTONSOFT_RectangularGoalRegion_H
+#define COMPTONSOFT_RectangularGoalRegion_H 1
 
-#ifndef COMPTONSOFT_RateData_H
-#define COMPTONSOFT_RateData_H 1
-
+#include "VGoalRegion.hh"
 #include <vector>
-#include <string>
-#include "IsotopeInfo.hh"
+#include <tuple>
 
-namespace comptonsoft
-{
+namespace comptonsoft {
 
-using RateVector = std::vector<IsotopeInfo>;
-
-
-class RateData
+/**
+ * A class of rectangular goal regions for charge transport
+ *
+ * @author Hirokazu Odaka
+ * @date 2020-04-18
+ */
+class RectangularGoalRegion : public VGoalRegion
 {
 public:
-  RateData() = default;
-  ~RateData();
-  RateData(const RateData&) = default;
-  RateData(RateData&&) = default;
-  RateData& operator=(const RateData&) = default;
-  RateData& operator=(RateData&&) = default;
+  RectangularGoalRegion() = default;
+  void addRegion(double x0, double x1, double y0, double y1, double z0, double z1);
+  bool isReached(const vector3_t& position) override;
 
-  bool readFile(const std::string& filename);
-  bool writeFile(const std::string& filename);
-
-  void setCountThreshold(double v) { count_threshold_ = v; }
-  double CountThreshold() const { return count_threshold_; }
-
-  std::size_t NumberOfVolumes() const
-  { return data_.size(); }
-
-  std::string getVolumeName(std::size_t i) const
-  { return data_[i].first; }
-
-  RateVector getRateVector(std::size_t i) const
-  { return data_[i].second; }
-
-  void pushData(const std::string volumeName, const RateVector& rateVector)
-  { data_.push_back(std::make_pair(volumeName, rateVector)); }
-  
 private:
-  std::vector<std::pair<std::string, RateVector>> data_;
-  double count_threshold_ = 0.0;
+  using region_t = std::tuple<double, double, double, double, double, double>;
+  std::vector<region_t> regions_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RateData_H */
+#endif /* COMPTONSOFT_RectangularGoalRegion_H */

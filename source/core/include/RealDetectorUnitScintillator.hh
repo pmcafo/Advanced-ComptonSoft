@@ -17,59 +17,41 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_RealDetectorUnitScintillator_H
+#define COMPTONSOFT_RealDetectorUnitScintillator_H 1
+
+#include "VRealDetectorUnit.hh"
+
+namespace comptonsoft {
+
 /**
- * @file RateData.hh
- * @brief header file of class RateData
+ * A class of a scintillator unit.
  * @author Hirokazu Odaka
- * @date 2016-05-04
+ * @date 2008-09-17
+ * @date 2014-10-08
  */
-
-#ifndef COMPTONSOFT_RateData_H
-#define COMPTONSOFT_RateData_H 1
-
-#include <vector>
-#include <string>
-#include "IsotopeInfo.hh"
-
-namespace comptonsoft
-{
-
-using RateVector = std::vector<IsotopeInfo>;
-
-
-class RateData
+class RealDetectorUnitScintillator : public VRealDetectorUnit
 {
 public:
-  RateData() = default;
-  ~RateData();
-  RateData(const RateData&) = default;
-  RateData(RateData&&) = default;
-  RateData& operator=(const RateData&) = default;
-  RateData& operator=(RateData&&) = default;
+  RealDetectorUnitScintillator();
+  virtual ~RealDetectorUnitScintillator();
 
-  bool readFile(const std::string& filename);
-  bool writeFile(const std::string& filename);
+  DetectorType Type() const override
+  { return DetectorType::Scintillator; }
 
-  void setCountThreshold(double v) { count_threshold_ = v; }
-  double CountThreshold() const { return count_threshold_; }
+  void setSize(double x, double y, double z) override
+  {
+    VRealDetectorUnit::setSize(x, y, z);
+    VRealDetectorUnit::setPixelPitch(x, y);
+  }
 
-  std::size_t NumberOfVolumes() const
-  { return data_.size(); }
+  void reconstruct(const DetectorHitVector& hitSignals,
+                   DetectorHitVector& hitsReconstructed) override;
 
-  std::string getVolumeName(std::size_t i) const
-  { return data_[i].first; }
-
-  RateVector getRateVector(std::size_t i) const
-  { return data_[i].second; }
-
-  void pushData(const std::string volumeName, const RateVector& rateVector)
-  { data_.push_back(std::make_pair(volumeName, rateVector)); }
-  
 private:
-  std::vector<std::pair<std::string, RateVector>> data_;
-  double count_threshold_ = 0.0;
+  void determinePosition(DetectorHitVector& hits);
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RateData_H */
+#endif /* COMPTONSOFT_RealDetectorUnitScintillator_H */

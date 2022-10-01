@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,59 +18,47 @@
  *                                                                       *
  *************************************************************************/
 
-/**
- * @file RateData.hh
- * @brief header file of class RateData
- * @author Hirokazu Odaka
- * @date 2016-05-04
- */
-
-#ifndef COMPTONSOFT_RateData_H
-#define COMPTONSOFT_RateData_H 1
+#ifndef COMPTONSOFT_ReadoutModule_H
+#define COMPTONSOFT_ReadoutModule_H 1
 
 #include <vector>
-#include <string>
-#include "IsotopeInfo.hh"
+#include "ChannelID.hh"
 
-namespace comptonsoft
-{
+namespace comptonsoft {
 
-using RateVector = std::vector<IsotopeInfo>;
-
-
-class RateData
+/**
+ * A class of a readout module.
+ * @author Hirokazu Odaka
+ * @date 2014-11-11
+ * @date 2016-08-19 | change class name
+ */
+class ReadoutModule
 {
 public:
-  RateData() = default;
-  ~RateData();
-  RateData(const RateData&) = default;
-  RateData(RateData&&) = default;
-  RateData& operator=(const RateData&) = default;
-  RateData& operator=(RateData&&) = default;
+  ReadoutModule();
+  ~ReadoutModule();
 
-  bool readFile(const std::string& filename);
-  bool writeFile(const std::string& filename);
+  ReadoutModule(const ReadoutModule&) = default;
+  ReadoutModule(ReadoutModule&&) = default;
+  ReadoutModule& operator=(const ReadoutModule&) = default;
+  ReadoutModule& operator=(ReadoutModule&&) = default;
 
-  void setCountThreshold(double v) { count_threshold_ = v; }
-  double CountThreshold() const { return count_threshold_; }
+  void setID(int v) { ID_ = v; }
+  int ID() const { return ID_; }
 
-  std::size_t NumberOfVolumes() const
-  { return data_.size(); }
+  void push(int detectorID, int detectorSection);
+  void clear();
 
-  std::string getVolumeName(std::size_t i) const
-  { return data_[i].first; }
+  const std::vector<DetectorBasedChannelID>& Sections() const
+  { return sections_; }
+  int NumberOfSections() const { return sections_.size(); }
+  DetectorBasedChannelID getSection(int index) const;
 
-  RateVector getRateVector(std::size_t i) const
-  { return data_[i].second; }
-
-  void pushData(const std::string volumeName, const RateVector& rateVector)
-  { data_.push_back(std::make_pair(volumeName, rateVector)); }
-  
 private:
-  std::vector<std::pair<std::string, RateVector>> data_;
-  double count_threshold_ = 0.0;
+  int ID_ = 0;
+  std::vector<DetectorBasedChannelID> sections_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RateData_H */
+#endif /* COMPTONSOFT_DetectorReadoutModule_H */

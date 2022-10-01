@@ -17,59 +17,27 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_RealDetectorUnitFactory_H
+#define COMPTONSOFT_RealDetectorUnitFactory_H 1
+
+#include "VDetectorUnitFactory.hh"
+
+namespace comptonsoft {
+
 /**
- * @file RateData.hh
- * @brief header file of class RateData
+ * An abstract factory class for real detector units.
  * @author Hirokazu Odaka
- * @date 2016-05-04
+ * @date 2014-11-14
  */
-
-#ifndef COMPTONSOFT_RateData_H
-#define COMPTONSOFT_RateData_H 1
-
-#include <vector>
-#include <string>
-#include "IsotopeInfo.hh"
-
-namespace comptonsoft
-{
-
-using RateVector = std::vector<IsotopeInfo>;
-
-
-class RateData
+class RealDetectorUnitFactory : public VDetectorUnitFactory
 {
 public:
-  RateData() = default;
-  ~RateData();
-  RateData(const RateData&) = default;
-  RateData(RateData&&) = default;
-  RateData& operator=(const RateData&) = default;
-  RateData& operator=(RateData&&) = default;
-
-  bool readFile(const std::string& filename);
-  bool writeFile(const std::string& filename);
-
-  void setCountThreshold(double v) { count_threshold_ = v; }
-  double CountThreshold() const { return count_threshold_; }
-
-  std::size_t NumberOfVolumes() const
-  { return data_.size(); }
-
-  std::string getVolumeName(std::size_t i) const
-  { return data_[i].first; }
-
-  RateVector getRateVector(std::size_t i) const
-  { return data_[i].second; }
-
-  void pushData(const std::string volumeName, const RateVector& rateVector)
-  { data_.push_back(std::make_pair(volumeName, rateVector)); }
-  
-private:
-  std::vector<std::pair<std::string, RateVector>> data_;
-  double count_threshold_ = 0.0;
+  VRealDetectorUnit* createDetectorUnit2DPixel() override;
+  VRealDetectorUnit* createDetectorUnit2DStrip() override;
+  VRealDetectorUnit* createDetectorUnitScintillator() override;
+  VRealDetectorUnit* createDetectorUnit3DVoxel() override;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RateData_H */
+#endif /* COMPTONSOFT_RealDetectorUnitFactory_H */
