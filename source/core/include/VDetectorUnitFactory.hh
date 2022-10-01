@@ -17,67 +17,39 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_SimDetectorUnit3DVoxel_H
-#define COMPTONSOFT_SimDetectorUnit3DVoxel_H 1
+#ifndef COMPTONSOFT_VDetectorUnitFactory_H
+#define COMPTONSOFT_VDetectorUnitFactory_H 1
 
-#include "RealDetectorUnit3DVoxel.hh"
-#include "DeviceSimulation.hh"
-
-class TH3D;
+#include <string>
 
 namespace comptonsoft {
 
+class VRealDetectorUnit;
+
 /**
- * A class of a 3D-voxel detector unit including device simulations.
+ * An abstract factory class for detector units.
  * @author Hirokazu Odaka
- * @date 2022-04-27
+ * @date 2014-11-14
  */
-class SimDetectorUnit3DVoxel
-  : public RealDetectorUnit3DVoxel, public DeviceSimulation
+class VDetectorUnitFactory
 {
 public:
-  SimDetectorUnit3DVoxel();
-  virtual ~SimDetectorUnit3DVoxel();
+  VDetectorUnitFactory() = default;
+  virtual ~VDetectorUnitFactory();
 
-  void initializeEvent() override;
-
-  void printSimulationParameters(std::ostream& os) const override;
-
-protected:
-  virtual DetectorHit_sptr generateHit(const DetectorHit& rawhit,
-                                       const VoxelID& voxel);
-
-  bool checkRange(const VoxelID& voxel) const override;
-  int IndexOfTable(const VoxelID& voxel) const override;
-  int SizeOfTable() const override;
-  VoxelID TableIndexToPixelID(int index) const override;
+  virtual VRealDetectorUnit* createDetectorUnit(const std::string& type);
+  virtual VRealDetectorUnit* createDetectorUnit2DPixel() = 0;
+  virtual VRealDetectorUnit* createDetectorUnit2DStrip() = 0;
+  virtual VRealDetectorUnit* createDetectorUnitScintillator() = 0;
+  virtual VRealDetectorUnit* createDetectorUnit3DVoxel() = 0;
 
 private:
-  void simulatePulseHeights() override;
+  VDetectorUnitFactory(const VDetectorUnitFactory&) = delete;
+  VDetectorUnitFactory(VDetectorUnitFactory&&) = delete;
+  VDetectorUnitFactory& operator=(const VDetectorUnitFactory&) = delete;
+  VDetectorUnitFactory& operator=(VDetectorUnitFactory&&) = delete;
 };
-
-inline bool SimDetectorUnit3DVoxel::checkRange(const VoxelID& voxel) const
-{
-  return ( 0<=voxel.X() && voxel.X()<getNumVoxelX()
-           && 0<=voxel.Y() && voxel.Y()<getNumVoxelY()
-           && 0<=voxel.Z() && voxel.Z()<getNumVoxelZ() );
-}
-
-inline int SimDetectorUnit3DVoxel::IndexOfTable(const VoxelID&) const
-{
-  return 0;
-}
-
-inline int SimDetectorUnit3DVoxel::SizeOfTable() const
-{
-  return 1;
-}
-
-inline VoxelID SimDetectorUnit3DVoxel::TableIndexToPixelID(int) const
-{
-  return VoxelID();
-}
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_SimDetectorUnit3DVoxel_H */
+#endif /* COMPTONSOFT_VDetectorUnitFactory_H */
