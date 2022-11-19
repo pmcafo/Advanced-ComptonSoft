@@ -298,4 +298,18 @@ private:
   double TimeResolutionFast_;
   double TimeResolutionSlow_;
 
-  bool pedestalE
+  bool pedestalEnabled_;
+
+  std::vector<DetectorHit_sptr> RawHits_;
+  std::list<DetectorHit_sptr> SimulatedHits_;
+
+private:
+  VDeviceSimulation(const VDeviceSimulation&) = delete;
+  VDeviceSimulation(VDeviceSimulation&&) = delete;
+  VDeviceSimulation& operator=(const VDeviceSimulation&) = delete;
+  VDeviceSimulation& operator=(VDeviceSimulation&&) = delete;
+};
+
+} /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_VDeviceSimulation_H */
