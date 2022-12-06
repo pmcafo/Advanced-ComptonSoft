@@ -347,3 +347,35 @@ vector2_t CodedAperture::ApertureToDetector(vector2_t v)
   res.setX(-v.x());
   res.setY(v.y());
   return res;
+}
+
+vector2_t CodedAperture::DetectedAngleToSkyAngle(vector2_t v)
+{
+  v -= sky_offset_;
+  const double ang = -detector_roll_angle_;
+  v.rotate(ang);
+  vector2_t res;
+  res.setX(-v.x());
+  res.setY(v.y());
+  return res;
+}
+
+vector2_t CodedAperture::SkyAngleToDetectedAngle(vector2_t v)
+{
+  v += sky_offset_;
+  const double ang = -detector_roll_angle_;
+  v.rotate(ang);
+  vector2_t res;
+  res.setX(-v.x());
+  res.setY(v.y());
+  return res;
+}
+
+double CodedAperture::UniformDistribution(double x1, double x2) {
+  std::uniform_real_distribution<double> distribution(x1, x2);
+  const double t = distribution(randomGenerator_);
+  
+  return t;
+}
+
+} /* namespace comptonsoft */
