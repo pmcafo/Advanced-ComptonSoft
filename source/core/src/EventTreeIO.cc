@@ -121,4 +121,127 @@ void EventTreeIO::setBranchAddresses()
   tree_->SetBranchAddress("posx",           posx_.data());
   tree_->SetBranchAddress("posy",           posy_.data());
   tree_->SetBranchAddress("posz",           posz_.data());
-  tree_->SetBranchAddress("local_posx", 
+  tree_->SetBranchAddress("local_posx",     local_posx_.data());
+  tree_->SetBranchAddress("local_posy",     local_posy_.data());
+  tree_->SetBranchAddress("local_posz",     local_posz_.data());
+  tree_->SetBranchAddress("time",           time_.data());
+  tree_->SetBranchAddress("grade",          &grade_);
+}
+
+void EventTreeIO::fillHits(const int64_t eventID,
+                           const std::vector<DetectorHit_sptr>& hits)
+{
+  const int NumHits = hits.size();
+  if (NumHits==0) return;
+
+  num_hits_ = NumHits;
+
+  const DetectorHit_sptr& hit = hits[0];
+  eventid_ = (eventID >= 0) ? eventID : hit->EventID();
+  ti_ = hit->TI();
+  instrument_ = hit->InstrumentID();
+  flag_data_ = hit->FlagData();
+  flags_ = hit->Flags();
+  grade_ = hit->Grade();
+
+  for (int i=0; i<NumHits; i++) {
+    const DetectorHit_sptr& hit = hits[i];
+    detector_[i] = hit->DetectorID();
+    det_section_[i] = hit->DetectorSection();
+    readout_module_[i] = hit->ReadoutModuleID();
+    section_[i] = hit->ReadoutSection();
+    channel_[i] = hit->ReadoutChannel();
+    pixelx_[i] = hit->VoxelX();
+    pixely_[i] = hit->VoxelY();
+    pixelz_[i] = hit->VoxelZ();
+    rawpha_[i] = hit->RawPHA();
+    pha_[i] = hit->PHA();
+    epi_[i] = hit->EPI() / unit::keV;
+    trackid_[i] = hit->TrackID();
+    particle_[i] = hit->Particle();
+    real_time_[i] = hit->RealTime() / unit::second;
+    time_trig_[i] = hit->TriggeredTime() / unit::second;
+    time_group_[i] = hit->TimeGroup();
+    real_posx_[i] = hit->RealPositionX() / unit::cm;
+    real_posy_[i] = hit->RealPositionY() / unit::cm;
+    real_posz_[i] = hit->RealPositionZ() / unit::cm;
+    edep_[i] = hit->EnergyDeposit() / unit::keV;
+    echarge_[i] = hit->EnergyCharge() / unit::keV;
+    process_[i] = hit->Process();
+    energy_[i] = hit->Energy() / unit::keV;
+    posx_[i] = hit->PositionX() / unit::cm;
+    posy_[i] = hit->PositionY() / unit::cm;
+    posz_[i] = hit->PositionZ() / unit::cm;
+    local_posx_[i] = hit->LocalPositionX() / unit::cm;
+    local_posy_[i] = hit->LocalPositionY() / unit::cm;
+    local_posz_[i] = hit->LocalPositionZ() / unit::cm;
+    time_[i] = hit->Time() / unit::second;
+  }
+
+  tree_->Fill();
+}
+
+void EventTreeIO::fillUndetectedEvent(const int64_t eventID)
+{
+  num_hits_ = 0;
+  eventid_ = (eventID >= 0) ? eventID : 0;
+  ti_ = 0;
+  instrument_ = 0;
+  flag_data_ = 0;
+  flags_ = 0;
+  grade_ = -1;
+
+  tree_->Fill();
+}
+
+DetectorHit_sptr EventTreeIO::retrieveHit(std::size_t i) const
+{
+  DetectorHit_sptr hit(new DetectorHit);
+  hit->setEventID(eventid_);
+  hit->setTI(ti_);
+  hit->setInstrumentID(instrument_);
+  hit->setDetectorChannelID(detector_[i], det_section_[i], channel_[i]);
+  hit->setReadoutChannelID(readout_module_[i], section_[i], channel_[i]);
+  hit->setVoxel(pixelx_[i], pixely_[i], pixelz_[i]);
+  hit->setRawPHA(rawpha_[i]);
+  hit->setPHA(pha_[i]);
+  hit->setEPI(epi_[i] * unit::keV);
+  hit->setFlagData(flag_data_);
+  hit->setFlags(flags_);
+  hit->setTrackID(trackid_[i]);
+  hit->setParticle(particle_[i]);
+  hit->setRealTime(real_time_[i] * unit::second);
+  hit->setTriggeredTime(time_trig_[i] * unit::second);
+  hit->setTimeGroup(time_group_[i]);
+  hit->setRealPosition(real_posx_[i] * unit::cm, real_posy_[i] * unit::cm, real_posz_[i] * unit::cm);
+  hit->setEnergyDeposit(edep_[i] * unit::keV);
+  hit->setEnergyCharge(echarge_[i] * unit::keV);
+  hit->setProcess(process_[i]);
+  hit->setEnergy(energy_[i] * unit::keV);
+  hit->setPosition(posx_[i] * unit::cm, posy_[i] * unit::cm, posz_[i] * unit::cm);
+  hit->setLocalPosition(local_posx_[i] * unit::cm, local_posy_[i] * unit::cm, local_posz_[i] * unit::cm);
+  hit->setTime(time_[i] * unit::second);
+  hit->setGrade(grade_);
+
+  return hit;
+}
+
+std::vector<DetectorHit_sptr> EventTreeIO::retrieveHits(int64_t& entry, bool get_entry)
+{
+  std::vector<DetectorHit_sptr> hits;
+
+  if (get_entry) {
+    tree_->GetEntry(entry);
+  }
+  
+  const int numHits = getNumberOfHits();
+  for (int i=0; i<numHits; i++) {
+    DetectorHit_sptr hit = retrieveHit(i);
+    hits.push_back(std::move(hit));
+  }
+
+  entry += 1;
+  return hits;
+}
+
+} /* namespace comptonsoft */
