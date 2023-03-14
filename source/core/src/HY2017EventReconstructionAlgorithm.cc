@@ -203,4 +203,9 @@ void HY2017EventReconstructionAlgorithm::normalizeReconstructionFraction(std::ve
   for (std::size_t i = 0; i < eventsReconstructed.size(); ++i) {
     sum_reconstruction_fraction += eventsReconstructed[i]->ReconstructionFraction();
   }
-  for(std::size_t i = 0; i < eventsReconstructed.size(); 
+  for(std::size_t i = 0; i < eventsReconstructed.size(); ++i) {
+    eventsReconstructed[i]->setReconstructionFraction(eventsReconstructed[i]->ReconstructionFraction() / sum_reconstruction_fraction);
+  }
+}
+
+} /* namespace comptonsoft */
