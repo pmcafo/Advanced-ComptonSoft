@@ -401,4 +401,72 @@ double HY2020EventReconstructionAlgorithm::getErrorCosThetaGeom(const vector3_t&
                          - incident_direction.y() / incident_direction.mag2() * cos_theta_;
   const double dcos_dy_B = incident_direction.y() / scattering_direction.mag() / incident_direction.mag()
                          - scattering_direction.y() / scattering_direction.mag2() * cos_theta_;
-  const double dcos_dy_
+  const double dcos_dy_sq = 2 * ( std::pow(dcos_dy_A, 2) + std::pow(dcos_dy_B, 2) - dcos_dy_A * dcos_dy_B );
+
+  const double dcos_dz_A = scattering_direction.z() / scattering_direction.mag() / incident_direction.mag()
+                         - incident_direction.z() / incident_direction.mag2() * cos_theta_;
+  const double dcos_dz_B = incident_direction.z() / scattering_direction.mag() / incident_direction.mag()
+                         - scattering_direction.z() / scattering_direction.mag2() * cos_theta_;
+  const double dcos_dz_sq = 2 * ( std::pow(dcos_dz_A, 2) + std::pow(dcos_dz_B, 2) - dcos_dz_A * dcos_dz_B );
+
+  const double error2 = dcos_dx_sq * std::pow(position_resolution_x_, 2) 
+                      + dcos_dy_sq * std::pow(position_resolution_y_, 2) 
+                      + dcos_dz_sq * std::pow(position_resolution_z_, 2);
+
+  return std::sqrt(error2);
+}
+
+double HY2020EventReconstructionAlgorithm::
+probEnergyDetection(double energy_real, double energy_detected, double sigma_energy)
+{
+  const double sigma_energy_2 = std::pow(sigma_energy, 2);
+  const double prob = 1.0 / std::sqrt( 2 * CLHEP::pi * sigma_energy_2)
+    * std::exp( - std::pow(energy_real - energy_detected, 2) / 2.0 / sigma_energy_2 );
+  return prob;
+}
+
+double HY2020EventReconstructionAlgorithm::
+probCompton(double gammaray_energy_before_hit, double path_length)
+{
+  const double cs_tot_ = tg_cross_section_tot_->Eval(gammaray_energy_before_hit);
+  const double cs_compton_ = tg_cross_section_compton_->Eval(gammaray_energy_before_hit);
+  const double prob = std::exp( -1 * cs_tot_ * path_length ) * cs_compton_ / std::pow( path_length, 2 );
+  return prob;
+}
+
+double HY2020EventReconstructionAlgorithm::
+probComptonFirst(double gammaray_energy_before_hit) {
+  const double cs_tot_ = tg_cross_section_tot_->Eval(gammaray_energy_before_hit);
+  const double cs_compton_ = tg_cross_section_compton_->Eval(gammaray_energy_before_hit);
+  double prob = std::exp( -1 * cs_tot_ * detector_length_scale) * cs_compton_;
+
+  return prob;
+}
+
+double HY2020EventReconstructionAlgorithm::
+probAbsorption(double gammaray_energy_before_hit, double path_length)
+{
+  const double cs_tot_ = tg_cross_section_tot_->Eval(gammaray_energy_before_hit);
+  const double cs_phot_abs_ = tg_cross_section_phot_abs_->Eval(gammaray_energy_before_hit);
+  const double prob = std::exp( -1 * cs_tot_ * path_length ) * cs_phot_abs_ / std::pow( path_length, 2 );
+  return prob;
+}
+
+double HY2020EventReconstructionAlgorithm::
+probEscape(double gammaray_energy_before_lasthit, double energy_deposit_lasthit)
+{
+  const double cs_tot_escape = tg_cross_section_tot_->Eval( gammaray_energy_before_lasthit - energy_deposit_lasthit );
+  const double cos_theta_last_scattering = cosThetaKinematics( gammaray_energy_before_lasthit, energy_deposit_lasthit);
+  if(kinematics_check_){
+    if (cos_theta_last_scattering < -1.0 || 1.0 < cos_theta_last_scattering) {
+      return 0.0;
+    }
+  }
+  
+  double prob = 2 * CLHEP::pi * normalized_differentialCrossSection( gammaray_energy_before_lasthit, cos_theta_last_scattering );
+  prob *= std::exp( -1 * cs_tot_escape * escape_length_scale );
+  prob *= CLHEP::electron_mass_c2 / pow(gammaray_energy_before_lasthit - energy_deposit_lasthit, 2);
+  return prob;
+}
+
+} /* namespace comptonsoft */
