@@ -17,38 +17,31 @@
  *                                                                       *
  *************************************************************************/
 
-#include "RealDetectorUnitScintillator.hh"
-#include <algorithm>
-#include <iterator>
-#include "DetectorHit.hh"
+#include "RectangularGoalRegion.hh"
 
 namespace comptonsoft {
 
-RealDetectorUnitScintillator::RealDetectorUnitScintillator() = default;
-
-RealDetectorUnitScintillator::~RealDetectorUnitScintillator() = default;
-
-void RealDetectorUnitScintillator::
-reconstruct(const DetectorHitVector& hitSignals,
-            DetectorHitVector& hitsReconstructed)
+void RectangularGoalRegion::
+addRegion(double x0, double x1, double y0, double y1, double z0, double z1)
 {
-  std::transform(hitSignals.begin(), hitSignals.end(),
-                 std::back_inserter(hitsReconstructed),
-                 [](const DetectorHit_sptr& hit) {
-                   auto hit2 = hit->clone();
-                   hit2->setEnergy(hit->EPI());
-                   hit2->setEnergyError(hit->EPIError());
-                   return hit2;
-                 });
-  determinePosition(hitsReconstructed);
+  regions_.push_back(std::make_tuple(x0, x1, y0, y1, z0, z1));
 }
 
-void RealDetectorUnitScintillator::determinePosition(DetectorHitVector& hits)
+bool RectangularGoalRegion::isReached(const vector3_t& position)
 {
-  for (auto& hit: hits) {
-    hit->setPosition(getCenterPosition());
-    hit->setLocalPosition(0.0, 0.0, 0.0);
+  const double x = position.x();
+  const double y = position.y();
+  const double z = position.z();
+  
+  for (const region_t& r: regions_) {
+    const double rx0 = std::get<0>(r); const double rx1 = std::get<1>(r);
+    const double ry0 = std::get<2>(r); const double ry1 = std::get<3>(r);
+    const double rz0 = std::get<4>(r); const double rz1 = std::get<5>(r);
+    if (rx0<=x && x<=rx1 && ry0<=y && y<=ry1 && rz0<=z && z<=rz1) {
+      return true;
+    }
   }
+  return false;
 }
 
 } /* namespace comptonsoft */
