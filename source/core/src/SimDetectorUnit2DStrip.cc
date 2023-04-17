@@ -318,4 +318,321 @@ ChargeCollectionEfficiency(const PixelID& sp,
   }
   else if (sp.isYStrip()) {
     const double yInPixel = y - pixelCenter.y();
-    const int iy = CCEMapYStrip_->Get
+    const int iy = CCEMapYStrip_->GetXaxis()->FindBin(yInPixel/unit::cm);
+    const int iz = CCEMapYStrip_->GetYaxis()->FindBin(z/unit::cm);
+    cce =  CCEMapYStrip_->GetBinContent(iy, iz);
+  }
+
+  return cce;
+}
+
+double SimDetectorUnit2DStrip::
+WeightingPotential(const PixelID& sp,
+                   const double x, const double y, const double z)
+{
+  const vector3_t pixelCenter = LocalPosition(sp);
+
+  double wp = 0.0;
+  if (sp.isXStrip()) {
+    const double xInPixel = x - pixelCenter.x();
+    const int ix = WPMapXStrip_->GetXaxis()->FindBin(xInPixel/unit::cm);
+    const int iz = WPMapXStrip_->GetYaxis()->FindBin(z/unit::cm);
+    wp =  WPMapXStrip_->GetBinContent(ix, iz);
+  }
+  else if (sp.isYStrip()) {
+    const double yInPixel = y - pixelCenter.y();
+    const int iy = WPMapYStrip_->GetXaxis()->FindBin(yInPixel/unit::cm);
+    const int iz = WPMapYStrip_->GetYaxis()->FindBin(z/unit::cm);
+    wp =  WPMapYStrip_->GetBinContent(iy, iz);
+  }
+
+  return wp;
+}
+
+bool SimDetectorUnit2DStrip::isCCEMapPrepared()
+{
+  return (getCCEMapXStrip()!=0 && getCCEMapYStrip()!=0);
+}
+
+void SimDetectorUnit2DStrip::buildWPMap()
+{
+  if (ChargeCollectionMode() == 2) {
+    buildWPMap(19, 19, 128, 1.0);
+  }
+  else if (ChargeCollectionMode() == 3) {
+    buildWPMap(95, 95, 128, 5.0);
+  }
+  else if (ChargeCollectionMode() == 4) {
+    buildWPMap(285, 285, 128, 15.0);
+  }
+  else {
+    std::cout << "Error : buildWPMap() " << std::endl;
+    return;
+  }
+}
+
+void SimDetectorUnit2DStrip::buildWPMap(int nx, int ny, int nz, double pixel_factor)
+{
+  if (nx<1 || ny<1 || nz<=1) {
+    std::cout << "Error : buildWPMap " << std::endl;
+    return;
+  }
+
+  const double MapSizeX = getPixelPitchX()*pixel_factor;
+  const double MapSizeY = getPixelPitchY()*pixel_factor;
+  const double MapSizeZ = getThickness()*static_cast<double>(nz)/static_cast<double>(nz-1);
+
+  if (ChargeCollectionMode() == 2) {
+    if (MapSizeX<getPixelPitchX()*0.999 || MapSizeY<getPixelPitchY()*0.999) {
+      std::cout << "Warning: map size is smaller than required in sim mode 2.";
+    }
+  }
+  else if (ChargeCollectionMode() == 3) {
+    if (MapSizeX<getPixelPitchX()*4.999 || MapSizeY<getPixelPitchY()*4.999) {
+      std::cout << "Warning: map size is smaller than required in sim mode 3.";
+    }
+  }
+  
+  const std::string histnameX = (boost::format("wp_%04d_x")%getID()).str();
+  WPMapXStrip_ =  new TH2D(histnameX.c_str(), histnameX.c_str(),
+                           nx, -0.5*MapSizeX/unit::cm, +0.5*MapSizeX/unit::cm,
+                           nz, -0.5*MapSizeZ/unit::cm, +0.5*MapSizeZ/unit::cm);
+  const std::string histnameY = (boost::format("wp_%04d_y")%getID()).str();
+  WPMapYStrip_ =  new TH2D(histnameY.c_str(), histnameY.c_str(),
+                           ny, -0.5*MapSizeY/unit::cm, +0.5*MapSizeY/unit::cm,
+                           nz, -0.5*MapSizeZ/unit::cm, +0.5*MapSizeZ/unit::cm);
+
+  std::cout << "calculating weighing potential..." << std::endl;
+
+  auto wpModel = std::make_unique<WeightingPotentialStrip>();
+  wpModel->setGeometry(getPixelPitchX(), getThickness(),
+                       NumPixelsInWPCalculation());
+  wpModel->initializeTable();
+  for (int ix=1; ix<=nx; ix++) {
+    std::cout << '*' << std::flush;
+    const double x = WPMapXStrip_->GetXaxis()->GetBinCenter(ix) * unit::cm;
+    wpModel->setX(x);
+    for (int iz=1; iz<=nz; iz++) {
+      const double z = WPMapXStrip_->GetYaxis()->GetBinCenter(iz) * unit::cm;
+      if (isUpSideXStrip()) {
+        double wp = 0.;
+        if (iz==nz) {
+          if (std::abs(x)<0.5*getPixelPitchX()) {
+            wp = 1.;
+          }
+          else {
+            wp = 0.;
+          }
+        }
+        else if (iz==1) {
+          wp = 0.;
+        }
+        else {
+          wp = wpModel->calculateWeightingPotential(z);
+        }
+        WPMapXStrip_->SetBinContent(ix, iz, wp);
+      }
+      else {
+        double wp = 0.;
+        if (iz==1) {
+          if (std::abs(x)<0.5*getPixelPitchX()) {
+            wp = 1.;
+          }
+          else {
+            wp = 0.;
+          }
+        }
+        else if (iz==nz) {
+          wp = 0.;
+        }
+        else {
+          wp = wpModel->calculateWeightingPotential(-z);
+        }
+        WPMapXStrip_->SetBinContent(ix, iz, wp);
+      }
+    }
+  }
+
+  wpModel->setGeometry(getPixelPitchY(), getThickness(), NumPixelsInWPCalculation());
+  wpModel->initializeTable();
+  for (int iy=1; iy<=ny; iy++) {
+    std::cout << '*' << std::flush;
+    const double y = WPMapYStrip_->GetXaxis()->GetBinCenter(iy) * unit::cm;
+    wpModel->setX(y);
+    for (int iz=1; iz<=nz; iz++) {
+      const double z = WPMapYStrip_->GetYaxis()->GetBinCenter(iz) * unit::cm;
+      if (isUpSideYStrip()) {
+        double wp = 0.;
+        if (iz==nz) {
+          if (std::abs(y)<0.5*getPixelPitchY()) {
+            wp = 1.;
+          }
+          else {
+            wp = 0.;
+          }
+        }
+        else if (iz==1) {
+          wp = 0.;
+        }
+        else {
+          wp = wpModel->calculateWeightingPotential(z);
+        }
+        WPMapYStrip_->SetBinContent(iy, iz, wp);
+      }
+      else {
+        double wp = 0.;
+        if (iz==1) {
+          if (std::abs(y)<0.5*getPixelPitchY()) {
+            wp = 1.;
+          }
+          else {
+            wp = 0.;
+          }
+        }
+        else if (iz==nz) {
+          wp = 0.;
+        }
+        else {
+          wp = wpModel->calculateWeightingPotential(-z);
+        }
+        WPMapYStrip_->SetBinContent(iy, iz, wp);
+      }
+    }
+  }
+  
+  std::cout << std::endl;
+}
+
+void SimDetectorUnit2DStrip::buildCCEMap()
+{
+  if (ChargeCollectionMode() == 2) {
+    buildCCEMap(19, 19, 127, 1.0);
+  }
+  else if (ChargeCollectionMode() == 3) {
+    buildCCEMap(95, 95, 127, 5.0);
+  }
+  else if (ChargeCollectionMode() == 4) {
+    buildCCEMap(285, 285, 127, 15.0);
+  }
+  else {
+    std::cout << "Error : buildCCEMap() " << std::endl;
+    return;
+  }
+}
+
+void SimDetectorUnit2DStrip::buildCCEMap(int nx, int ny, int nz, double pixel_factor)
+{
+  if (nx<1 || ny<1 || nz<1) {
+    std::cout << "Error : buildCCEMap " << std::endl;
+    return;
+  }
+
+  const double MapSizeX = getPixelPitchX()*pixel_factor;
+  const double MapSizeY = getPixelPitchY()*pixel_factor;
+  const double MapSizeZ = getThickness();
+
+  if (ChargeCollectionMode() == 2) {
+    if (MapSizeX<getPixelPitchX()*0.999 || MapSizeY<getPixelPitchY()*0.999) {
+      std::cout << "Warning: map size is smaller than required in sim mode 2.";
+    }
+  }
+  else if (ChargeCollectionMode() == 3) {
+    if (MapSizeX<getPixelPitchX()*2.999 || MapSizeY<getPixelPitchY()*2.999) {
+      std::cout << "Warning: map size is smaller than required in sim mode 3.";
+    }
+  }
+  
+  const std::string histnameX = (boost::format("cce_%04d_x")%getID()).str();
+  CCEMapXStrip_ =  new TH2D(histnameX.c_str(), histnameX.c_str(),
+                            nx, -0.5*MapSizeX/unit::cm, +0.5*MapSizeX/unit::cm,
+                            nz, -0.5*MapSizeZ/unit::cm, +0.5*MapSizeZ/unit::cm);
+  const std::string histnameY = (boost::format("cce_%04d_y")%getID()).str();
+  CCEMapYStrip_ =  new TH2D(histnameY.c_str(), histnameY.c_str(),
+                            nx, -0.5*MapSizeY/unit::cm, +0.5*MapSizeY/unit::cm,
+                            nz, -0.5*MapSizeZ/unit::cm, +0.5*MapSizeZ/unit::cm);
+  
+  std::cout << "calculating charge collection efficiency..." << std::endl;
+  
+  for (int ix=1; ix<=nx; ix++) {
+    std::cout << '*' << std::flush;
+    if (!isUsingSymmetry() || ix<=(nx+1)/2) {
+      const double x_in_cm = CCEMapXStrip_->GetXaxis()->GetBinCenter(ix);
+      const int binx = WPMapXStrip_->GetXaxis()->FindBin(x_in_cm);
+      
+      const int numPoints = nz+1;
+      boost::shared_array<double> wp(new double[numPoints]);
+      for (int k=0; k<numPoints; k++) {
+        const double z_in_cm = CCEMapXStrip_->GetYaxis()->GetBinLowEdge(k+1);
+        const int binz = WPMapXStrip_->GetYaxis()->FindBin(z_in_cm);
+        wp[k] = WPMapXStrip_->GetBinContent(binx, binz);
+      }
+      setWeightingPotential(isUpSideXStrip(), wp, numPoints);
+      
+      for (int iz=1; iz<=nz; iz++) {
+        const double z = CCEMapXStrip_->GetYaxis()->GetBinCenter(iz) * unit::cm;
+        const double cce = calculateCCE(z);
+        // std::cout << cce << std::endl;
+        CCEMapXStrip_->SetBinContent(ix, iz, cce);
+      }
+    }
+  }
+
+  if (isUsingSymmetry()) {
+    for (int ix=1; ix<=nx; ix++) {
+      for (int iz=1; iz<=nz; iz++) {
+        if (ix>(nx+1)/2) {
+          const double cce = CCEMapXStrip_->GetBinContent(nx-ix+1, iz);
+          CCEMapXStrip_->SetBinContent(ix, iz, cce);
+        }
+      }
+    }
+  }
+
+  for (int iy=1; iy<=ny; iy++) {
+    std::cout << '*' << std::flush;
+    if (!isUsingSymmetry() || iy<=(ny+1)/2) {
+      const double y_in_cm = CCEMapYStrip_->GetXaxis()->GetBinCenter(iy);
+      const int biny = WPMapYStrip_->GetXaxis()->FindBin(y_in_cm);
+      
+      const int numPoints = nz+1;
+      boost::shared_array<double> wp(new double[numPoints]);
+      for (int k=0; k<numPoints; k++) {
+        const double z_in_cm = CCEMapYStrip_->GetYaxis()->GetBinLowEdge(k+1);
+        const int binz = WPMapYStrip_->GetYaxis()->FindBin(z_in_cm);
+        wp[k] = WPMapYStrip_->GetBinContent(biny, binz);
+      }
+      setWeightingPotential(isUpSideYStrip(), wp, numPoints);
+      
+      for (int iz=1; iz<=nz; iz++) {
+        const double z = CCEMapYStrip_->GetYaxis()->GetBinCenter(iz) * unit::cm;
+        const double cce = calculateCCE(z);
+        CCEMapYStrip_->SetBinContent(iy, iz, cce);
+      }
+    }
+  }
+
+  if (isUsingSymmetry()) {
+    for (int iy=1; iy<=ny; iy++) {
+      for (int iz=1; iz<=nz; iz++) {
+        if (iy>(ny+1)/2) {
+          const double cce = CCEMapYStrip_->GetBinContent(ny-iy+1, iz);
+          CCEMapYStrip_->SetBinContent(iy, iz, cce);
+        }
+      }
+    }
+  }
+
+  std::cout << std::endl;
+  std::cout << "Charge collection efficiency map is built." << std::endl;
+}
+
+void SimDetectorUnit2DStrip::printSimulationParameters(std::ostream& os) const
+{
+  os << "<SimDetectorUnit2DStrip>" << '\n'
+     << "Upside anode   : " << isUpSideAnode() << '\n'
+     << "Upside x-strip : " << isUpSideXStrip() << '\n'
+     << std::endl;
+  DeviceSimulation::printSimulationParameters(os);
+}
+
+} /* namespace comptonsoft */
