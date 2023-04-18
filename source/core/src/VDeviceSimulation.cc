@@ -377,4 +377,25 @@ void VDeviceSimulation::assignLocalDepth(DetectorHit_sptr hit) const
 
   if (DepthSensingMode()==1) {
     double zMeasured = CLHEP::RandGauss::shoot(localposz, DepthResolution());
-    if (zMeasured < -0.5*getThi
+    if (zMeasured < -0.5*getThickness()) {
+      zMeasured = -0.5*getThickness();
+    }
+    else if (zMeasured > +0.5*getThickness()) {
+      zMeasured = +0.5*getThickness();
+    }
+
+    hit->setDepthSensingMode(DepthSensingMode());
+    hit->setLocalPosition(localposx, localposy, zMeasured);
+  }
+}
+
+void VDeviceSimulation::assignLocalPositionError(DetectorHit_sptr hit) const
+{
+  const double conversionToSigma = 1.0/std::sqrt(12.0);
+  const double dx = getVoxelPitchX()*conversionToSigma;
+  const double dy = getVoxelPitchY()*conversionToSigma;
+  const double dz = (DepthSensingMode()==1) ? DepthResolution() : (getVoxelPitchZ()*conversionToSigma);
+  hit->setLocalPositionError(dx, dy, dz);
+}
+
+} /* namespace comptonsoft */
