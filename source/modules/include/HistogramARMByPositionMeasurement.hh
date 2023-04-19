@@ -17,45 +17,31 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_HistogramARMByPositionMeasurement_H
+#define COMPTONSOFT_HistogramARMByPositionMeasurement_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
+#include "HistogramARM.hh"
+#include <memory>
 
-#include "ExtractXrayEventImage.hh"
+class TRandom;
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
+class HistogramARMByPositionMeasurement : public HistogramARM
 {
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
-  // ENABLE_PARALLEL_RUN();
+  DEFINE_ANL_MODULE(HistogramARMByPositionMeasurement, 3.1);
 public:
-  ExtractXrayEventImageFromQuickLookDB();
-  
-protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+  HistogramARMByPositionMeasurement();
+  ~HistogramARMByPositionMeasurement();
 
-public:
   anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
 
-protected:
-  void setLatestAnalysisId();
-
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
-
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  int m_NumSamples;
+  std::unique_ptr<TRandom> m_RandomGenerator;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_HistogramARMByPositionMeasurement_H */

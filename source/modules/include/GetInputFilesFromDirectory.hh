@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,45 +18,53 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_GetInputFilesFromDirectory_H
+#define COMPTONSOFT_GetInputFilesFromDirectory_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
-
-#include "ExtractXrayEventImage.hh"
+#include <anlnext/BasicModule.hh>
+#include <ctime>
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
+class VDataReader;
+
+/**
+ * GetInputFilesFromDirectory
+ *
+ * @author Hirokazu Odaka
+ * @date 2019-11-13
+ * @date 2021-10-24 | Tsubasa Tamba | 1.1 | search from directory sequence
+ * @date 2022-02-01 | Hirokazu Odaka | 1.2 | code review
+ */
+class GetInputFilesFromDirectory : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
+  DEFINE_ANL_MODULE(GetInputFilesFromDirectory, 1.2);
   // ENABLE_PARALLEL_RUN();
 public:
-  ExtractXrayEventImageFromQuickLookDB();
+  GetInputFilesFromDirectory();
   
 protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+  GetInputFilesFromDirectory(const GetInputFilesFromDirectory&);
 
 public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
 
-protected:
-  void setLatestAnalysisId();
-
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
+  std::string reader_module_;
+  std::string directory_;
+  std::string extension_;
+  int delay_ = 0;
+  int wait_ = 0;
+  VDataReader* data_reader_ = nullptr;
+  bool is_new_entry_ = true;
+  std::time_t entry_time_ = 0;
 
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  std::vector<std::string> directory_sequence_;
+  int directory_index_ = 0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_GetInputFilesFromDirectory_H */

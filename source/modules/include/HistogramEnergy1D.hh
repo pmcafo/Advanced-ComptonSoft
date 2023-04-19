@@ -17,45 +17,39 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_HistogramEnergy1D_H
+#define COMPTONSOFT_HistogramEnergy1D_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
+#include "VCSModule.hh"
 
-#include "ExtractXrayEventImage.hh"
+class TH1;
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
-{
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
-  // ENABLE_PARALLEL_RUN();
-public:
-  ExtractXrayEventImageFromQuickLookDB();
-  
-protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+class EventReconstruction;
 
+class HistogramEnergy1D : public VCSModule
+{
+  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
 public:
+  HistogramEnergy1D();
+  ~HistogramEnergy1D() = default;
+
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-
-protected:
-  void setLatestAnalysisId();
-
+  
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
+  const EventReconstruction* eventReconstruction_;
 
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  TH1* hist_all_;
+  std::vector<TH1*> hist_vec_;
+
+  int numBins_;
+  double energy0_;
+  double energy1_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_Hi

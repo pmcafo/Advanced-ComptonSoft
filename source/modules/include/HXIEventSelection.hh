@@ -17,45 +17,34 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_HXIEventSelection_H
+#define COMPTONSOFT_HXIEventSelection_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
-
-#include "ExtractXrayEventImage.hh"
+#include "VCSModule.hh"
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
-{
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
-  // ENABLE_PARALLEL_RUN();
-public:
-  ExtractXrayEventImageFromQuickLookDB();
-  
-protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+class CSHitCollection;
 
+/**
+ * HXI event selection.
+ * @author Hirokazu Odaka
+ * @date 2011-xx-xx
+ */
+class HXIEventSelection : public VCSModule
+{
+  DEFINE_ANL_MODULE(HXIEventSelection, 1.1);
 public:
-  anlnext::ANLStatus mod_define() override;
+  HXIEventSelection() = default;
+  ~HXIEventSelection() = default;
+
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
 
-protected:
-  void setLatestAnalysisId();
-
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
-
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  CSHitCollection* m_HitCollection = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_HXIEventSelection_H */

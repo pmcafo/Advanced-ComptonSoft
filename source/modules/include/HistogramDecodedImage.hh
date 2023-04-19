@@ -17,45 +17,51 @@
  *                                                                       *
  *************************************************************************/
 
+/**
+ * HistogramDecodedImage
+ *
+ * @author Taihei Watanabe
+ * @date 2021-09-28
+ */
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
+#ifndef COMPTONSOFT_HistogramDecodedImage_H
+#define COMPTONSOFT_HistogramDecodedImage_H 1
 
-#include "ExtractXrayEventImage.hh"
+#include "VCSModule.hh"
+#include "ProcessCodedAperture.hh"
+
+class TH2;
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
+class HistogramDecodedImage : public VCSModule
 {
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
+  DEFINE_ANL_MODULE(HistogramDecodedImage, 1.0);
   // ENABLE_PARALLEL_RUN();
 public:
-  ExtractXrayEventImageFromQuickLookDB();
+  HistogramDecodedImage();
   
 protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+  HistogramDecodedImage(const HistogramDecodedImage&);
 
 public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_end_run() override;
 
-protected:
-  void setLatestAnalysisId();
+  void drawCanvas(TCanvas* canvas, std::vector<std::string>* filenames) override;
 
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
+  void sumImages();
 
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+private:
+  std::vector<std::string> decodingModuleNames_;
+  std::string outputName_;
+  
+  std::vector<ProcessCodedAperture*> modules_;
+  TH2* histogram_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_HistogramDecodedImage_H */

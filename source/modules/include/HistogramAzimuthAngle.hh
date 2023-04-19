@@ -17,45 +17,45 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_HistogramAzimuthAngle_H
+#define COMPTONSOFT_HistogramAzimuthAngle_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
+#include "VCSModule.hh"
+#include <vector>
 
-#include "ExtractXrayEventImage.hh"
+class TH1;
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
-{
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
-  // ENABLE_PARALLEL_RUN();
-public:
-  ExtractXrayEventImageFromQuickLookDB();
-  
-protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+class EventReconstruction;
 
+class HistogramAzimuthAngle : public VCSModule
+{
+  DEFINE_ANL_MODULE(HistogramAzimuthAngle, 2.3);
 public:
+  HistogramAzimuthAngle();
+  ~HistogramAzimuthAngle() = default;
+  
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-
-protected:
-  void setLatestAnalysisId();
-
+  anlnext::ANLStatus mod_end_run() override;
+  
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
+  const EventReconstruction* eventReconstruction_;
 
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  TH1* hist_all_;
+  std::vector<TH1*> hist_vec_;
+  TH1* hist_delta_all_;
+  std::vector<TH1*> hist_delta_vec_;
+
+  int numBins_;
+  double theta_min_;
+  double theta_max_;
+  double phi_origin_;
+  bool sky_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_HistogramAzimuthAngle_H */

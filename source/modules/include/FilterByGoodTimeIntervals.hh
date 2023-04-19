@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,45 +18,41 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_FilterByGoodTimeIntervals_H
+#define COMPTONSOFT_FilterByGoodTimeIntervals_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
-
-#include "ExtractXrayEventImage.hh"
+#include <anlnext/BasicModule.hh>
+#include <tuple>
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
-{
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
-  // ENABLE_PARALLEL_RUN();
-public:
-  ExtractXrayEventImageFromQuickLookDB();
-  
-protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+class CSHitCollection;
 
+/**
+ * @author Hirokazu Odaka
+ * @date 2016-12-08
+ */
+class FilterByGoodTimeIntervals : public anlnext::BasicModule
+{
+  DEFINE_ANL_MODULE(FilterByGoodTimeIntervals, 1.0);
 public:
+  FilterByGoodTimeIntervals();
+  ~FilterByGoodTimeIntervals();
+
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
 
 protected:
-  void setLatestAnalysisId();
+  std::vector<std::tuple<double, double>> m_GTIs;
 
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
+  const CSHitCollection* m_HitCollection = nullptr;
 
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  double m_TimeStart = 0.0;
+  double m_TimeEnd = 0.0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_FilterByGoodTimeIntervals_H */

@@ -17,45 +17,49 @@
  *                                                                       *
  *************************************************************************/
 
+#ifndef COMPTONSOFT_Histogram2DDeltaEnergyWithARM_H
+#define COMPTONSOFT_Histogram2DDeltaEnergyWithARM_H 1
 
-#ifndef COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H
-#define COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H 1
+#include "VCSModule.hh"
 
-#include "ExtractXrayEventImage.hh"
+class TH2;
+
+namespace anlgeant4 {
+class InitialInformation;
+}
 
 namespace comptonsoft {
 
-class ExtractXrayEventImageFromQuickLookDB : public ExtractXrayEventImage
-{
-  DEFINE_ANL_MODULE(ExtractXrayEventImageFromQuickLookDB, 1.0);
-  // ENABLE_PARALLEL_RUN();
-public:
-  ExtractXrayEventImageFromQuickLookDB();
-  
-protected:
-  ExtractXrayEventImageFromQuickLookDB(const ExtractXrayEventImageFromQuickLookDB&);
+class EventReconstruction;
 
+class Histogram2DDeltaEnergyWithARM : public VCSModule
+{
+  DEFINE_ANL_MODULE(Histogram2DDeltaEnergyWithARM, 3.1)
 public:
+  Histogram2DDeltaEnergyWithARM();
+  ~Histogram2DDeltaEnergyWithARM() = default;
+
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-
-protected:
-  void setLatestAnalysisId();
-
+  
 private:
-  std::string collectionName_;
-  int collectionType_ = 0;
-  int initial_frame_id_;
-  int max_frame_per_loop_;
-  std::string HostName_;
-  std::string dbName_;
-  std::string analysisId_;
+  const EventReconstruction* eventReconstruction_;
+  const anlgeant4::InitialInformation* initialInfo_;
 
-  int last_frame_id_;
-  XrayEventCollection* collection_ = nullptr;
+  TH2* hist_all_;
+  std::vector<TH2*> hist_vec_;
+  TH2* hist_compton_all_;
+  std::vector<TH2*> hist_compton_vec_;
+
+  int numEnergyBins_;
+  double energy0_;
+  double energy1_;
+  int numARMBins_;
+  double arm0_;
+  double arm1_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ExtractXrayEventImageFromQuickLookDB_H */
+#endif /* COMPTONSOFT_Histogram2DDeltaEnergyWithARM_H */
