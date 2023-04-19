@@ -17,39 +17,59 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+/**
+ * HistogramFramePedestal
+ *
+ * @author Hirokazu Odaka
+ * @date 2020-06-17
+ */
+
+#ifndef COMPTONSOFT_HistogramFramePedestal_H
+#define COMPTONSOFT_HistogramFramePedestal_H 1
 
 #include "VCSModule.hh"
 
-class TH1;
+class TH2;
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class XrayEventCollection;
 
-class HistogramEnergy1D : public VCSModule
+class HistogramFramePedestal : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramFramePedestal, 1.0);
+  // ENABLE_PARALLEL_RUN();
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  HistogramFramePedestal();
+  
+protected:
+  HistogramFramePedestal(const HistogramFramePedestal&);
 
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_end_run() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
+  void drawCanvas(TCanvas* canvas, std::vector<std::string>* filenames) override;
+
 private:
-  const EventReconstruction* eventReconstruction_;
+  int detectorID_ = 0;
+  int meanNumBins_ = 1;
+  double meanMin_ = 0.0;
+  double meanMax_ = 0.0;
+  int sigmaNumBins_ = 1;
+  double sigmaMin_ = 0.0;
+  double sigmaMax_ = 0.0;
 
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
+  std::string outputName_;
+  
+  TH2* histogram_ = nullptr;
+  FrameData* frame_;
 
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  void fillInHistogram();
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramFramePedestal_H */

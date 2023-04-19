@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,56 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_LoadRootFrame_H
+#define COMPTONSOFT_LoadRootFrame_H 1
 
-#include "VCSModule.hh"
+#include <cstdint>
+#include <boost/multi_array.hpp>
+#include <TChain.h>
+#include <anlnext/BasicModule.hh>
+#include "FrameData.hh"
 
-class TH1;
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class FrameData;
+using raw_image_t = boost::multi_array<uint16_t, 2>;
 
-class HistogramEnergy1D : public VCSModule
+
+/**
+ * LoadRootFrame
+ *
+ * @author Tsubasa Tamba
+ * @date 2019-07-22
+ * @date 2020-04-01 | Hirokazu Odaka | upgrade for new ConstrcutFrame
+ */
+class LoadRootFrame : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(LoadRootFrame, 1.1);
+  // ENABLE_PARALLEL_RUN();
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  LoadRootFrame();
+  
+protected:
+  LoadRootFrame(const LoadRootFrame&);
 
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
 private:
-  const EventReconstruction* eventReconstruction_;
+  int detector_id_ = 0;
+  std::vector<std::string> files_;
+  std::string treename_;
+  std::string branchname_;
+  size_t numEntries_ = 0;
+  TChain* frametree_;
 
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  FrameData* frame_ = nullptr;
+  raw_image_t rawPH_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_LoadRootFrame_H */

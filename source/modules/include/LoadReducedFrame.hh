@@ -17,39 +17,31 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_LoadReducedFrame_H
+#define COMPTONSOFT_LoadReducedFrame_H 1
 
-#include "VCSModule.hh"
-
-class TH1;
+#include "LoadFrame.hh"
 
 namespace comptonsoft {
 
-class EventReconstruction;
-
-class HistogramEnergy1D : public VCSModule
+/**
+ * LoadReducedFrame
+ * 
+ * @author Taihei Watanabe
+ * @date 2021-07-29
+ * @date 2022-02-01 | 1.2 | Hirokazu Odaka | derived from LoadFrame
+ */
+class LoadReducedFrame : public LoadFrame
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(LoadReducedFrame, 1.2);
+
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  LoadReducedFrame();
 
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_analyze() override;
-  
-private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+protected:
+  bool load(FrameData* frame, const std::string& filename) override;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_LoadReducedFrame_H */

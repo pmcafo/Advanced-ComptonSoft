@@ -17,39 +17,28 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_MakeDetectorHits_H
+#define COMPTONSOFT_MakeDetectorHits_H 1
 
-#include "VCSModule.hh"
-
-class TH1;
+#include "SelectHits.hh"
 
 namespace comptonsoft {
 
-class EventReconstruction;
-
-class HistogramEnergy1D : public VCSModule
+class MakeDetectorHits : public SelectHits
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(MakeDetectorHits, 3.0);
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  MakeDetectorHits() = default;
+  ~MakeDetectorHits() = default;
 
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_analyze() override;
-  
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  void doProcessing() override;
+  bool setThresholdEnergy(VRealDetectorUnit* detector,
+                          double threshold,
+                          double thresholdCathode,
+                          double thresholdAnode) override;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_MakeDetectorHits_H */

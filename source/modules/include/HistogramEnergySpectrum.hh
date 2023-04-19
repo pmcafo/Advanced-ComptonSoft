@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,40 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_HistogramEnergySpectrum_H
+#define COMPTONSOFT_HistogramEnergySpectrum_H 1
 
 #include "VCSModule.hh"
 
 class TH1;
+namespace anlgeant4 { class InitialInformation; }
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class CSHitCollection;
 
-class HistogramEnergy1D : public VCSModule
+class HistogramEnergySpectrum : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramEnergySpectrum, 1.1);
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  HistogramEnergySpectrum();  
+  ~HistogramEnergySpectrum() = default;
 
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
   
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  CSHitCollection* m_HitCollection;
+  const anlgeant4::InitialInformation* m_InitialInfo;
+  std::string m_EnergyBinType;
+  int m_NumBinEnergy;
+  double m_RangeEnergy1;
+  double m_RangeEnergy2;
+  std::map<std::string, TH1*> m_Histograms;
+  std::vector<std::string> m_Selections;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramEnergySpectrum_H */

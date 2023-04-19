@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,23 +18,23 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_HistogramEnergy2D_H
+#define COMPTONSOFT_HistogramEnergy2D_H 1
 
 #include "VCSModule.hh"
 
-class TH1;
+class TH2;
 
 namespace comptonsoft {
 
 class EventReconstruction;
 
-class HistogramEnergy1D : public VCSModule
+class HistogramEnergy2D : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramEnergy2D, 3.1)
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  HistogramEnergy2D();
+  ~HistogramEnergy2D() = default;
 
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
@@ -42,8 +43,8 @@ public:
 private:
   const EventReconstruction* eventReconstruction_;
 
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
+  TH2* hist_all_;
+  std::vector<TH2*> hist_vec_;
 
   int numBins_;
   double energy0_;
@@ -52,4 +53,4 @@ private:
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramEnergy2D_H */

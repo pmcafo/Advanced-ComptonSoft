@@ -17,8 +17,15 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+/**
+ * HistogramXrayEventAzimuthAngle
+ *
+ * @author Tsubasa Tamba
+ * @date 2019-11-13
+ */
+
+#ifndef COMPTONSOFT_HistogramXrayEventAzimuthAngle_H
+#define COMPTONSOFT_HistogramXrayEventAzimuthAngle_H 1
 
 #include "VCSModule.hh"
 
@@ -26,30 +33,36 @@ class TH1;
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class XrayEventCollection;
 
-class HistogramEnergy1D : public VCSModule
+class HistogramXrayEventAzimuthAngle : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramXrayEventAzimuthAngle, 1.0);
+  // ENABLE_PARALLEL_RUN();
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  HistogramXrayEventAzimuthAngle();
+  
+protected:
+  HistogramXrayEventAzimuthAngle(const HistogramXrayEventAzimuthAngle&);
 
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
+  void drawCanvas(TCanvas* canvas, std::vector<std::string>* filenames) override;
+
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  int numBins_ = 1;
+  double angleMin_ = 0.0;
+  double angleMax_ = 1.0;
+  std::string collectionModule_;
+  std::string outputName_;
+  
+  XrayEventCollection* collection_ = nullptr;
+  TH1* histogram_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramXrayEventAzimuthAngle_H */

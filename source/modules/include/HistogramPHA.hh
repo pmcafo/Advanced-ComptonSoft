@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,45 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_HistogramPHA_H
+#define COMPTONSOFT_HistogramPHA_H 1
 
 #include "VCSModule.hh"
+#include <string>
+#include <vector>
+#include <functional>
 
 class TH1;
 
 namespace comptonsoft {
 
-class EventReconstruction;
-
-class HistogramEnergy1D : public VCSModule
+/**
+ * Making histograms.
+ * @author Hirokazu Odaka
+ * @date 2014-11-30
+ */
+class HistogramPHA : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramPHA, 3.0);
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
-
+  HistogramPHA();
+  ~HistogramPHA() = default;
+ 
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  bool m_ReadoutOrder;
+  bool m_GroupingInSection;
+  std::string m_HistogramType;
+  std::vector<TH1*> m_Histograms;
+  int m_NumBins;
+  double m_RangeMin;
+  double m_RangeMax;
+  std::function<double (MultiChannelData*, int)> m_GetterFunc;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramPHA_H */

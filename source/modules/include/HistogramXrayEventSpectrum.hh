@@ -17,8 +17,15 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+/**
+ * HistogramXrayEventSpectrum
+ *
+ * @author Tsubasa Tamba
+ * @date 2019-11-12
+ */
+
+#ifndef COMPTONSOFT_HistogramXrayEventSpectrum_H
+#define COMPTONSOFT_HistogramXrayEventSpectrum_H 1
 
 #include "VCSModule.hh"
 
@@ -26,30 +33,36 @@ class TH1;
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class XrayEventCollection;
 
-class HistogramEnergy1D : public VCSModule
+class HistogramXrayEventSpectrum : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramXrayEventSpectrum, 1.0);
+  // ENABLE_PARALLEL_RUN();
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  HistogramXrayEventSpectrum();
+  
+protected:
+  HistogramXrayEventSpectrum(const HistogramXrayEventSpectrum&);
 
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
+  void drawCanvas(TCanvas* canvas, std::vector<std::string>* filenames) override;
+
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  int numBins_ = 1;
+  double energyMin_ = 0.0;
+  double energyMax_ = 1.0;
+  std::string collectionModule_;
+  std::string outputName_;
+  
+  XrayEventCollection* collection_ = nullptr;
+  TH1* histogram_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramXrayEventSpectrum_H */

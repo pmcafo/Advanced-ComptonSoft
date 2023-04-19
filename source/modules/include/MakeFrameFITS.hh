@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,44 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_MakeFrameFITS_H
+#define COMPTONSOFT_MakeFrameFITS_H 1
 
 #include "VCSModule.hh"
-
-class TH1;
+#include <vector>
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class CSHitCollection;
 
-class HistogramEnergy1D : public VCSModule
+/**
+ * @author Tsubasa Tamba, Hirokazu Odaka
+ * @date 2019-04-16 | created by T. Tamba
+ * @date 2019-04-19 | cleanup by H. Odaka
+ */
+class MakeFrameFITS : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(MakeFrameFITS, 1.0);
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  MakeFrameFITS();
+  ~MakeFrameFITS();
 
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
 private:
-  const EventReconstruction* eventReconstruction_;
+  std::string m_FileNameBase;
+  int m_NumPixelX = 1;
+  int m_NumPixelY = 1;
 
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  CSHitCollection* m_HitCollection = nullptr;
+  long m_NumPixelsArray[2] = {1, 1};
+  long m_NumPixels = 1;
+  std::vector<double> m_EnergyArray;
+  std::vector<long> m_CountArray;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_MakeFrameFITS_H */

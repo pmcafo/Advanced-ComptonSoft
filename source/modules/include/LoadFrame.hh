@@ -17,39 +17,62 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_LoadFrame_H
+#define COMPTONSOFT_LoadFrame_H 1
 
-#include "VCSModule.hh"
-
-class TH1;
+#include <anlnext/BasicModule.hh>
+#include <unordered_set>
+#include "VDataReader.hh"
 
 namespace comptonsoft {
 
-class EventReconstruction;
+class FrameData;
 
-class HistogramEnergy1D : public VCSModule
+
+/**
+ * LoadFrame
+ *
+ * @author Hirokazu Odaka
+ * @date 2019-05-23
+ * @date 2020-04-01 | upgrade for new ConstructFrame
+ * @date 2021-09-30 | Taihei Watanabe | use a hash for checking file overlap
+ */
+class LoadFrame : public anlnext::BasicModule, public VDataReader
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(LoadFrame, 1.2);
+  // ENABLE_PARALLEL_RUN();
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  LoadFrame();
+  
+protected:
+  LoadFrame(const LoadFrame&);
 
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
+  void addFile(const std::string& filename) override;
+  bool hasFile(const std::string& filename) const override;
+  bool isDone() const override;
+
+  std::string CurrentFilename() override { return current_filename_; };
+
+protected:
+  virtual bool load(FrameData* frame, const std::string& filename);
+
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  bool byte_order_ = true;
+  int odd_row_pixel_shift_ = 0;
+  int start_position_ = 0;
+  bool read_direction_x_ = false;
+  int detector_id_ = 0;
+  std::vector<std::string> files_;
+  std::unordered_set<std::string> file_hash_;
+  FrameData* frame_ = nullptr;
+  std::string current_filename_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_LoadFrame_H */

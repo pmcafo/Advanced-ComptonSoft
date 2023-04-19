@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,54 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_LoadMetaDataFile_H
+#define COMPTONSOFT_LoadMetaDataFile_H 1
 
-#include "VCSModule.hh"
-
-class TH1;
+#include <chrono>
+#include <anlnext/BasicModule.hh>
+#include "LoadReducedFrame.hh"
+#include "VDataReader.hh"
 
 namespace comptonsoft {
 
-class EventReconstruction;
-
-class HistogramEnergy1D : public VCSModule
+/**
+ * LoadReducedFrame
+ * 
+ * @author Taihei Watanabe
+ * @date 2021-09-30
+ * @date 2022-02-01 | 1.2 | Hirokazu Odaka | code review
+ */
+class LoadMetaDataFile : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
-public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  DEFINE_ANL_MODULE(LoadMetaDataFile, 1.2);
 
+public:
+  LoadMetaDataFile();
+  
+protected:
+  LoadMetaDataFile(const LoadMetaDataFile&);
+
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
+  int Temperature() const { return temperature_; };
+  std::chrono::system_clock::time_point CaptureTime() const { return capture_time_; };
+  std::string Filename() const { return data_filename_; };
+
 private:
-  const EventReconstruction* eventReconstruction_;
+  std::string data_reader_module_;
+  std::string data_file_extension_;
+  std::string meta_file_extension_;
 
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
+  VDataReader* data_reader_ = nullptr;
 
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  std::string data_filename_ = "";
+  int temperature_ = 0;
+  std::chrono::system_clock::time_point capture_time_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_LoadMetaDataFile_H */

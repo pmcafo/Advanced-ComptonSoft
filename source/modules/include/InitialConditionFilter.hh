@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,34 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+#ifndef COMPTONSOFT_InitialConditionFilter_H
+#define COMPTONSOFT_InitialConditionFilter_H 1
 
-#include "VCSModule.hh"
+#include <anlnext/BasicModule.hh>
 
-class TH1;
+namespace anlgeant4 {
+class InitialInformation;
+}
 
 namespace comptonsoft {
 
-class EventReconstruction;
-
-class HistogramEnergy1D : public VCSModule
+class InitialConditionFilter : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(InitialConditionFilter, 1.2);
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  InitialConditionFilter();
+  ~InitialConditionFilter() = default;
 
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
 private:
-  const EventReconstruction* eventReconstruction_;
-
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
   double energy0_;
   double energy1_;
+  const anlgeant4::InitialInformation* initialInfo_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_InitialConditionFilter_H */

@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,39 +18,55 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_HistogramEnergy1D_H
-#define COMPTONSOFT_HistogramEnergy1D_H 1
+/**
+ * HistogramRawFrameImage
+ *
+ * @author Tsubasa Tamba
+ * @date 2020-11-02
+ * @date 2023-09-13 | H.Odaka | draw-each-frame mode
+ */
+
+#ifndef COMPTONSOFT_HistogramRawFrameImage_H
+#define COMPTONSOFT_HistogramRawFrameImage_H 1
 
 #include "VCSModule.hh"
+#include <memory>
+#include "FrameData.hh"
+#include "XrayEvent.hh"
 
-class TH1;
+class TH2;
 
 namespace comptonsoft {
 
-class EventReconstruction;
-
-class HistogramEnergy1D : public VCSModule
+class HistogramRawFrameImage : public VCSModule
 {
-  DEFINE_ANL_MODULE(HistogramEnergy1D, 3.1)
+  DEFINE_ANL_MODULE(HistogramRawFrameImage, 1.0);
+  // ENABLE_PARALLEL_RUN();
 public:
-  HistogramEnergy1D();
-  ~HistogramEnergy1D() = default;
+  HistogramRawFrameImage();
 
+public:
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+  anlnext::ANLStatus mod_end_run() override;
+
+  void drawCanvas(TCanvas* canvas, std::vector<std::string>* filenames) override;
+
+protected:
+  void fillHistogram();
+
 private:
-  const EventReconstruction* eventReconstruction_;
+  int detectorID_ = 0;
+  std::string outputName_;
+  int rebinX_ = 1;
+  int rebinY_ = 1;
+  bool update_each_frame_ = false;
 
-  TH1* hist_all_;
-  std::vector<TH1*> hist_vec_;
-
-  int numBins_;
-  double energy0_;
-  double energy1_;
+  FrameData* frame_ = nullptr;
+  TH2* histogram_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_HistogramEnergy1D_H */
+#endif /* COMPTONSOFT_HistogramRawFrameImage_H */
