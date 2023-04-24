@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,36 +18,59 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+#ifndef COMPTONSOFT_SortEventTreeWithTime_H
+#define COMPTONSOFT_SortEventTreeWithTime_H 1
 
 #include "VCSModule.hh"
+#include "InitialInformation.hh"
+
+#include <list>
+#include <vector>
+#include <string>
+#include <cstdint>
+#include "DetectorHit_sptr.hh"
+#include <memory>
+
+class TChain;
+class TTree;
 
 namespace comptonsoft {
 
 class CSHitCollection;
+class EventTreeIOWithInitialInfo;
 
 /**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
+ * @author Tsubasa Tamba
+ * @date 2014-06-07
  */
-class RecalculateSimulationNoise : public VCSModule
+class SortEventTreeWithTime : public VCSModule, public anlgeant4::InitialInformation
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SortEventTreeWithTime, 1.0);
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
-
+  SortEventTreeWithTime();
+  ~SortEventTreeWithTime();
+  
+  anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
   anlnext::ANLStatus mod_analyze() override;
+
+protected:
+  virtual void insertHit(const DetectorHit_sptr& hit);
   
 private:
-  CSHitCollection* m_HitCollection;
+  std::vector<std::string> fileList_;
+
+  TChain* tree_;
+  int64_t numEntries_ = 0;
+  int64_t entryIndex_ = 0;
+
+  CSHitCollection* hitCollection_;
+  std::unique_ptr<EventTreeIOWithInitialInfo> treeIO_;
+  std::list<std::vector<DetectorHit_sptr>> eventList_;
+  std::list<std::vector<DetectorHit_sptr>>::iterator eventIter_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SortEventTreeWithTime_H */

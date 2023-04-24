@@ -17,36 +17,44 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+#ifndef COMPTONSOFT_SelectFullDeposit_H
+#define COMPTONSOFT_SelectFullDeposit_H 1
 
-#include "VCSModule.hh"
+#include <anlnext/BasicModule.hh>
+
+namespace anlgeant4 {
+
+class InitialInformation;
+
+}
 
 namespace comptonsoft {
 
 class CSHitCollection;
 
 /**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
+ * Select events that have complete energy deposit. (no energy escape.)
+ * @author  Hirokazu Odaka
+ * @date 2008-12-12
+ * @date 2011-04-26
  */
-class RecalculateSimulationNoise : public VCSModule
+class SelectFullDeposit : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SelectFullDeposit, 1.1);
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
+  SelectFullDeposit() = default;
+  ~SelectFullDeposit() = default;
 
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
   
 private:
   CSHitCollection* m_HitCollection;
+  const anlgeant4::InitialInformation* m_InitialInfo;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SelectFullDeposit_H */
+
+

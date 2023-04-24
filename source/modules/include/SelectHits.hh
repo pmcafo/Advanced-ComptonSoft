@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,36 +18,66 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+#ifndef COMPTONSOFT_SelectHits_H
+#define COMPTONSOFT_SelectHits_H 1
 
 #include "VCSModule.hh"
 
+#include <map>
+#include <tuple>
+#include "CSHitCollection.hh"
+
 namespace comptonsoft {
 
-class CSHitCollection;
-
-/**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
- */
-class RecalculateSimulationNoise : public VCSModule
+class SelectHits : public VCSModule
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SelectHits, 3.0);
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
+  SelectHits();
+  ~SelectHits();
 
+  anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
+
+protected:
+  void insertHitIntoTheCollection(const DetectorHit_sptr& hit)
+  { m_HitCollection->insertHit(hit); }
   
 private:
-  CSHitCollection* m_HitCollection;
+  virtual bool setAnalysisParameters();
+  virtual void doProcessing();
+  virtual void collectHits();
+
+  virtual bool setThresholdEnergy(VRealDetectorUnit* detector,
+                                  double threshold,
+                                  double thresholdCathode,
+                                  double thresholdAnode);
+
+  bool setEnergyConsistencyCheckFunctions(VRealDetectorUnit* detector,
+                                          double lowerC0,
+                                          double lowerC1,
+                                          double upperC0,
+                                          double upperC1);
+
+private:
+  CSHitCollection* m_HitCollection = nullptr;
+
+  int m_DetectorType;
+  int m_ReconstructionMode;
+  double m_Threshold;
+  double m_ThresholdCathode;
+  double m_ThresholdAnode;
+  double m_LowerECheckFuncC0;
+  double m_LowerECheckFuncC1;
+  double m_UpperECheckFuncC0;
+  double m_UpperECheckFuncC1;
+  std::map<std::string,
+           std::tuple<int, int,
+                      double, double, double,
+                      double, double, double, double>> m_AnalysisMap;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SelectHits_H */

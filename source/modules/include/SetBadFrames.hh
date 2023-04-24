@@ -17,36 +17,42 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+/**
+ * SetBadFrames.
+ *
+ * @author Tsubasa Tamba
+ * @date 2019-07-24
+ * @date 2020-04-01 | Hirokazu Odaka | use module-parameter | v1.1
+ *
+ */
+
+#ifndef COMPTONSOFT_SetBadFrames_H
+#define COMPTONSOFT_SetBadFrames_H 1
 
 #include "VCSModule.hh"
+#include "FrameData.hh"
 
 namespace comptonsoft {
 
-class CSHitCollection;
-
-/**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
- */
-class RecalculateSimulationNoise : public VCSModule
+class SetBadFrames : public VCSModule
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SetBadFrames, 1.1);
+  // ENABLE_PARALLEL_RUN();
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
-
+  SetBadFrames();
+  
+public:
+  anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
 private:
-  CSHitCollection* m_HitCollection;
+  int detectorID_ = 0;
+  std::vector<int> badFrames_;
+  std::vector<int>::iterator nextBadFrame_;
+  FrameData* frame_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SetBadFrames_H */

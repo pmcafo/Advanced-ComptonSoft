@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,36 +18,47 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+#ifndef COMPTONSOFT_SelectEventsOnFocalPlane_H
+#define COMPTONSOFT_SelectEventsOnFocalPlane_H 1
 
 #include "VCSModule.hh"
+#include "G4TwoVector.hh"
 
 namespace comptonsoft {
 
-class CSHitCollection;
+class EventReconstruction;
 
 /**
- * recalculate simulation noise in order to get new PIs.
+ *
  * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
+ * @date 2016-10-06
  */
-class RecalculateSimulationNoise : public VCSModule
+class SelectEventsOnFocalPlane : public VCSModule
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SelectEventsOnFocalPlane, 1.0);
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
+  enum class Region_t { Rectangle, Circle };
 
+public:
+  SelectEventsOnFocalPlane();
+  ~SelectEventsOnFocalPlane() = default;
+
+  anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+
 private:
-  CSHitCollection* m_HitCollection;
+  const EventReconstruction* m_EventReconstruction = nullptr;
+  int m_DetectorID;
+  std::string m_RegionTypeString;
+  Region_t m_RegionType;
+  G4TwoVector m_Center;
+  double m_SizeX;
+  double m_SizeY;
+  double m_Radius;
+  double m_Radius2;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SelectEventsOnFocalPlane_H */

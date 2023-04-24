@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,36 +18,50 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+#ifndef COMPTONSOFT_SelectEventsWithDetectorSpectrum_H
+#define COMPTONSOFT_SelectEventsWithDetectorSpectrum_H 1
 
 #include "VCSModule.hh"
+#include <list>
+#include "ReadEventTree.hh"
 
 namespace comptonsoft {
 
 class CSHitCollection;
 
-/**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
- */
-class RecalculateSimulationNoise : public VCSModule
-{
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
-public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
 
+/**
+ * @author Tsubasa Tamba
+ * @date 2019-12-02
+ */
+class SelectEventsWithDetectorSpectrum : public anlnext::BasicModule
+{
+  DEFINE_ANL_MODULE(SelectEventsWithDetectorSpectrum, 1.0);
+public:
+  SelectEventsWithDetectorSpectrum();
+  ~SelectEventsWithDetectorSpectrum();
+
+  anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
-  
+  anlnext::ANLStatus mod_end_run() override;
+
+  bool isGoodGrade(int grade);
+
 private:
-  CSHitCollection* m_HitCollection;
+  double exposure_ = 0.0;
+  std::vector<double> energyArray_;
+  std::vector<double> countRateArray_;
+  std::vector<int> countArray_;
+  int numRemainedBin_;
+  std::vector<int> photonStack_;
+  std::vector<int> goodGrade_;
+
+  CSHitCollection* hitCollection_ = nullptr;
+  ReadEventTree* readEventTree_ = nullptr;
+
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SelectEventsWithDetectorSpectrum_H */

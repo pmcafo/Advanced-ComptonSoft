@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,36 +18,46 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+/**
+ * SetDynamicPedestals.
+ *
+ * @author Taihei Watanabe
+ * @date 2021-04-02
+ */
+
+#ifndef COMPTONSOFT_SetDynamicPedestals_H
+#define COMPTONSOFT_SetDynamicPedestals_H 1
 
 #include "VCSModule.hh"
+#include <deque>
+#include <boost/multi_array.hpp>
+#include "CSTypes.hh"
 
 namespace comptonsoft {
 
-class CSHitCollection;
-
-/**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
- */
-class RecalculateSimulationNoise : public VCSModule
+class SetDynamicPedestals : public VCSModule
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SetDynamicPedestals, 1.1);
+  // ENABLE_PARALLEL_RUN();
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
-
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_analyze() override;
+  SetDynamicPedestals();
   
+public:
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
+
 private:
-  CSHitCollection* m_HitCollection;
+  int detectorID_ = 0;
+  int frameStoreCapacity_ = 1;
+  std::deque<image_t> frameStore_;
+  image_t frameSum_;
+  int nx_ = 1;
+  int ny_ = 1;
+  FrameData* frameData_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SetDynamicPedestals_H */

@@ -17,36 +17,40 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+/**
+ * SetPedestals.
+ *
+ * @author Hirokazu Odaka & Tsubasa Tamba
+ * @date 2019-05
+ * @date 2019-07-19 | merged to comptonsoft
+ * @date 2020-04-01 | v1.1
+ *
+ */
+
+#ifndef COMPTONSOFT_SetPedestals_H
+#define COMPTONSOFT_SetPedestals_H 1
 
 #include "VCSModule.hh"
 
-namespace comptonsoft {
-
-class CSHitCollection;
-
-/**
- * recalculate simulation noise in order to get new PIs.
- * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
- */
-class RecalculateSimulationNoise : public VCSModule
+namespace comptonsoft
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
-public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
 
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_analyze() override;
+class SetPedestals : public VCSModule
+{
+  DEFINE_ANL_MODULE(SetPedestals, 1.1);
+  // ENABLE_PARALLEL_RUN();
+public:
+  SetPedestals();
   
+public:
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_begin_run() override;
+
 private:
-  CSHitCollection* m_HitCollection;
+  std::string filename_;
+  int detector_id_ = 0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SetPedestals_H */

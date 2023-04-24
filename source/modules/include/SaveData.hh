@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,36 +18,45 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_RecalculateSimulationNoise_H
-#define COMPTONSOFT_RecalculateSimulationNoise_H 1
+#ifndef COMPTONSOFT_SaveData_H
+#define COMPTONSOFT_SaveData_H 1
 
-#include "VCSModule.hh"
+#include <anlnext/BasicModule.hh>
+#include <memory>
+
+class TFile;
 
 namespace comptonsoft {
 
-class CSHitCollection;
-
 /**
- * recalculate simulation noise in order to get new PIs.
+ * Module to manage TFile for save histograms/trees.
  * @author Hirokazu Odaka
- * @date 2011-02-16
- * @date 2014-11-26
- * @date 2020-09-02 | 3.0 | fix; treat EPI as a tuple of its value and error
+ * @date 2008-04-30
+ * @date 2017-03-23 | use unique_ptr for the root file.
  */
-class RecalculateSimulationNoise : public VCSModule
+class SaveData : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(RecalculateSimulationNoise, 3.0);
+  DEFINE_ANL_MODULE(SaveData, 3.0);
 public:
-  RecalculateSimulationNoise();
-  ~RecalculateSimulationNoise() = default;
-
-  anlnext::ANLStatus mod_initialize() override;
-  anlnext::ANLStatus mod_analyze() override;
+  SaveData();
+  ~SaveData();
   
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_pre_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_finalize() override;
+
+  TDirectory* GetDirectory();
+  bool cd();
+
+  std::string Filename() const { return m_Filename; }
+
 private:
-  CSHitCollection* m_HitCollection;
+  std::string m_Filename;
+  std::unique_ptr<TFile> m_RootFile;
+  int m_Period = 0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_RecalculateSimulationNoise_H */
+#endif /* COMPTONSOFT_SaveData_H */
