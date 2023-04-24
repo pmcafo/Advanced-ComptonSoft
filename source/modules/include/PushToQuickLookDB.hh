@@ -17,27 +17,62 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+/**
+ * PushToQuickLookDB
+ *
+ * @author Tsubasa Tamba, Hirokazu Odaka
+ * @date 2019-11-05
+ */
 
-#include "SelectHits.hh"
+#ifndef COMPTONSOFT_PushToQuickLookDB_H
+#define COMPTONSOFT_PushToQuickLookDB_H 1
+
+#include <anlnext/BasicModule.hh>
+#include "VCSModule.hh"
+#include "TCanvas.h"
+
+class TH2;
+
+namespace hsquicklook {
+class MongoDBClient;
+}
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+class PushToQuickLookDB : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(PushToQuickLookDB, 1.0);
+  // ENABLE_PARALLEL_RUN();
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  PushToQuickLookDB();
+  
+protected:
+  PushToQuickLookDB(const PushToQuickLookDB&);
 
+public:
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_end_run() override;
+
+protected:
+  void pushImagesToDB();
 
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  int canvas_width_ = 1;
+  int canvas_height_ = 1;
+  std::vector<std::string> moduleList_;
+  std::string collection_;
+  std::string directory_;
+  std::string document_;
+  int period_ = 1;
+  int phase_ = 0;
+  std::vector<VCSModule*> modules_;
+  TCanvas* canvas_;
+  std::vector<std::string> fileList_;
+  hsquicklook::MongoDBClient* mongodb_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_PushToQuickLookDB_H */

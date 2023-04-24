@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,27 +18,28 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_ReadEventTreeAsRawHits_H
+#define COMPTONSOFT_ReadEventTreeAsRawHits_H 1
 
-#include "SelectHits.hh"
+#include "ReadEventTree.hh"
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+/**
+ * @author Hitokazu Odaka
+ * @date 2015-11-14
+ */
+class ReadEventTreeAsRawHits : public ReadEventTree
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadEventTreeAsRawHits, 2.1);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
-
-  anlnext::ANLStatus mod_define() override;
-
-private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  ReadEventTreeAsRawHits();
+  ~ReadEventTreeAsRawHits() = default;
+  
+protected:
+  void insertHit(const DetectorHit_sptr& hit) override;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadEventTreeAsRawHits_H */

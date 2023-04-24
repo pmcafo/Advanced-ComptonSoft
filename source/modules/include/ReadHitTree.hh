@@ -17,27 +17,56 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_ReadHitTree_H
+#define COMPTONSOFT_ReadHitTree_H 1
 
-#include "SelectHits.hh"
+#include "VCSModule.hh"
+#include "InitialInformation.hh"
+
+#include <vector>
+#include <string>
+#include <cstdint>
+#include "DetectorHit_sptr.hh"
+
+class TChain;
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+class CSHitCollection;
+class HitTreeIOWithInitialInfo;
+
+/**
+ * @author Hitokazu Odaka
+ * @date 2014-11-30
+ * @date 2019-04-22 | initialization in mod_begin_run()
+ */
+class ReadHitTree : public VCSModule, public anlgeant4::InitialInformation
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadHitTree, 2.1);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
-
+  ReadHitTree();
+  ~ReadHitTree();
+  
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
 
+protected:
+  virtual void insertHit(const DetectorHit_sptr& hit);
+  
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  std::vector<std::string> fileList_;
+  bool trustNumHits_;
+
+  TChain* hittree_;
+  int64_t numEntries_ = 0;
+  int64_t entryIndex_ = 0;
+
+  CSHitCollection* hitCollection_;
+  std::unique_ptr<HitTreeIOWithInitialInfo> treeIO_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadHitTree_H */

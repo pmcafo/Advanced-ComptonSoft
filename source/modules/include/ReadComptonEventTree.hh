@@ -17,27 +17,47 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_ReadComptonEventTree_H
+#define COMPTONSOFT_ReadComptonEventTree_H 1
 
-#include "SelectHits.hh"
+#include "EventReconstruction.hh"
+#include "InitialInformation.hh"
+
+#include <vector>
+#include <string>
+
+class TChain;
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+class ComptonEventTreeIOWithInitialInfo;
+
+/*
+ * Read Compton event tree.
+ * @author Hirokazu Odaka
+ * @date 2008-12-15
+ * @date 2015-03-01
+ */
+class ReadComptonEventTree : public EventReconstruction, public anlgeant4::InitialInformation
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadComptonEventTree, 3.1);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  ReadComptonEventTree();
+  ~ReadComptonEventTree() = default;
 
   anlnext::ANLStatus mod_define() override;
-
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
+   
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  std::vector<std::string> fileList_;
+  TChain* cetree_;
+  int64_t numEntries_ = 0;
+  int64_t entryIndex_ = 0;
+
+  std::unique_ptr<ComptonEventTreeIOWithInitialInfo> treeIO_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadComptonEventTree_H */

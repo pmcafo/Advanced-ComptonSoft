@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,27 +18,43 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_ReadDataFile_NT_H
+#define COMPTONSOFT_ReadDataFile_NT_H 1
 
-#include "SelectHits.hh"
+#include "ReadDataFile.hh"
+
+#include <cstdint>
+#include <memory>
+
+class TChain;
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+/**
+ * Read data file: "NabeTree" format.
+ * @author Hirokazu Odaka
+ * @date 2011-11-20
+ * @date 2014-11-25
+ */
+class ReadDataFile_NT : public ReadDataFile
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadDataFile_NT, 3.2);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  ReadDataFile_NT() = default;
+  ~ReadDataFile_NT() = default;
 
-  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  TChain* m_Tree = nullptr;
+  uint32_t m_NEvents = 0u;
+  std::unique_ptr<std::unique_ptr<uint16_t[]>[]> m_ADC;
+  int m_UnixTime = 0;
+  // unsigned int m_LiveTime;
+  // unsigned int m_IntegralLiveTime;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadDataFile_NT_H */

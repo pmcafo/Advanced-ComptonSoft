@@ -17,27 +17,48 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+// ReadDataFile_VME3.hh
+// 2007-10-02  Hirokazu Odaka 
+// 2007-11-02  Hirokazu Odaka 
+// 2008-xx-xx  read dead time by Aono
+// 2008-08-31  Hirokazu Odaka 
 
-#include "SelectHits.hh"
+#ifndef COMPTONSOFT_ReadDataFile_VME3_H
+#define COMPTONSOFT_ReadDataFile_VME3_H 1
+
+#include "ReadDataFile.hh"
+
+#include <fstream>
+#include <string>
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+class ReadDataFile_VME3 : public ReadDataFile
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadDataFile_VME3, 3.2);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  ReadDataFile_VME3();
+  ~ReadDataFile_VME3() = default;
 
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
+  
+  unsigned short int DeadTime() const { return m_DeadTime; }
 
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  const static int READ_BUF_SIZE = 16384;
+  const static int HEADER_SIZE = 16;
+  const static int FOOTER_SIZE = 4;
+  const static int DATA_HEADER_LENGTH = 1;
+  const static int DATA_FOOTER_LENGTH = 1;
+
+  std::ifstream m_fin;
+  int m_ReadPacketSize;
+  unsigned short int m_DeadTime;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadDataFile_VME3_H */

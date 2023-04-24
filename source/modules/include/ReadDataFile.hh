@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,27 +18,50 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_ReadDataFile_H
+#define COMPTONSOFT_ReadDataFile_H 1
 
-#include "SelectHits.hh"
+#include "VCSModule.hh"
+#include <string>
+#include <vector>
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+/**
+ * Module for reading data files.
+ * @author Hirokazu Odaka
+ * @date 2007-10-02
+ * @date 2011-04-13
+ * @date 2014-11-25
+ */
+class ReadDataFile : public VCSModule
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadDataFile, 3.2);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  ReadDataFile();
+  ~ReadDataFile() = default;
 
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override
+  { ++m_EventID; return anlnext::AS_OK; }
 
+  int EventID() const { return m_EventID; }
+  int Time() const { return m_Time; }
+
+protected:
+  void setTime(int v) { m_Time = v; }
+  std::string nextFile() { return *(m_FileIterator++); }
+  bool wasLastFile() const { return (m_FileIterator==m_FileList.end()); }
+  bool checkFiles();
+  
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  int m_EventID;
+  int m_Time;
+  std::vector<std::string> m_FileList;
+  std::vector<std::string>::const_iterator m_FileIterator;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadDataFile_H */

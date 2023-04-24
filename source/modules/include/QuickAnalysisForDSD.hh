@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,27 +18,57 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_QuickAnalysisForDSD_H
+#define COMPTONSOFT_QuickAnalysisForDSD_H 1
 
-#include "SelectHits.hh"
+#include "VCSModule.hh"
 
-namespace comptonsoft {
+class TH1;
+class TH2;
 
-class MakeRawHits : public SelectHits
+namespace comptonsoft
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
-public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
 
+class RealDetectorUnit2DStrip;
+
+
+/**
+ * @author Hirokazu Odaka
+ * @date 2011-11-21
+ * @date 2016-10-26
+ */
+class QuickAnalysisForDSD : public VCSModule
+{
+  DEFINE_ANL_MODULE(QuickAnalysisForDSD, 1.2);
+public:
+  QuickAnalysisForDSD();
+  ~QuickAnalysisForDSD();
+  
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  comptonsoft::RealDetectorUnit2DStrip* m_DSD;
+  int m_DetectorID;
+  int m_NBins;
+  double m_Energy0;
+  double m_Energy1;
+  double m_CutEnergy0;
+  double m_CutEnergy1;
+  
+  TH1* m_Spectrum1HitCathode;
+  TH1* m_Spectrum1HitAnode;
+  TH1* m_Spectrum2HitCathode;
+  TH1* m_Spectrum2HitAnode;
+  TH2* m_E2DDoubleSide;
+  TH2* m_E2D2HitCathode;
+  TH2* m_E2D2HitAnode;
+  TH2* m_Image;
+  TH1* m_Image1DX;
+  TH1* m_Image1DY;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_QuickAnalysisForDSD_H */

@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,27 +18,45 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+// ReadDataFile_SpW2.hh
+// 2007-10-02  Hirokazu Odaka 
+// 2007-11-02  Hirokazu Odaka 
+// 2008-08-31  Hirokazu Odaka 
 
-#include "SelectHits.hh"
+#ifndef COMPTONSOFT_ReadDataFile_SpW2_H
+#define COMPTONSOFT_ReadDataFile_SpW2_H 1
+
+#include "ReadDataFile.hh"
+
+#include <fstream>
+#include <string>
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+class ReadDataFile_SpW2 : public ReadDataFile
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(ReadDataFile_SpW2, 3.2);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  ReadDataFile_SpW2();
+  ~ReadDataFile_SpW2() = default;
 
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
+
+  int DeltaTime() const { return m_DeltaTime; }
 
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  const static int READ_BUF_SIZE = 16384;
+  const static int HEADER_SIZE = 32;
+  const static int DATA_HEADER_LENGTH = 4;
+
+  std::ifstream m_fin;
+  int m_ReadPacketSize;
+  int m_DeltaTime;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadDataFile_SpW2_H */

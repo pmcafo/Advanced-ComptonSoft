@@ -17,27 +17,29 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+#ifndef COMPTONSOFT_RecalculateEPI_H
+#define COMPTONSOFT_RecalculateEPI_H 1
 
-#include "SelectHits.hh"
+#include "CorrectPHA.hh"
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
+/**
+ * Apply new gain function to PHA values in order to get new PIs.
+ * @author Hirokazu Odaka
+ * @date 2011-06-23
+ * @date 2014-09-12
+ */
+class RecalculateEPI : public CorrectPHA
 {
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
+  DEFINE_ANL_MODULE(RecalculateEPI, 1.1);
 public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+  RecalculateEPI() = default;
+  ~RecalculateEPI() = default;
 
-  anlnext::ANLStatus mod_define() override;
-
-private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  anlnext::ANLStatus mod_analyze() override;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_RecalculateEPI_H */

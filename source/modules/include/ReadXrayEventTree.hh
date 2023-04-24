@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,27 +18,53 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_MakeRawHits_H
-#define COMPTONSOFT_MakeRawHits_H 1
+/**
+ * ReadXrayEventTree
+ *
+ * @author Hirokazu Odaka
+ * @date 2019-10-30
+ */
 
-#include "SelectHits.hh"
+#ifndef COMPTONSOFT_ReadXrayEventTree_H
+#define COMPTONSOFT_ReadXrayEventTree_H 1
+
+#include <anlnext/BasicModule.hh>
+
+class TChain;
 
 namespace comptonsoft {
 
-class MakeRawHits : public SelectHits
-{
-  DEFINE_ANL_MODULE(MakeRawHits, 2.4);
-public:
-  MakeRawHits() = default;
-  ~MakeRawHits() = default;
+class XrayEventCollection;
+class XrayEventTreeIO;
 
+class ReadXrayEventTree : public anlnext::BasicModule
+{
+  DEFINE_ANL_MODULE(ReadXrayEventTree, 1.1);
+  // ENABLE_PARALLEL_RUN();
+public:
+  ReadXrayEventTree();
+  
+protected:
+  ReadXrayEventTree(const ReadXrayEventTree&);
+
+public:
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
-  bool setAnalysisParam();
-  void doProcessing() override;
+  std::vector<std::string> fileList_;
+  int eventSize_ = 1;
+
+  TChain* tree_;
+  int64_t numEntries_ = 0;
+  int64_t entryIndex_ = 0;
+
+  XrayEventCollection* collection_ = nullptr;
+  std::unique_ptr<XrayEventTreeIO> treeIO_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_MakeRawHits_H */
+#endif /* COMPTONSOFT_ReadXrayEventTree_H */
