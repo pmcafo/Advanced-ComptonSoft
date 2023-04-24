@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,52 +18,27 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
-
-#include <anlnext/BasicModule.hh>
-#include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
-
-class TDirectory;
+#ifndef COMPTONSOFT_VDataReader_H
+#define COMPTONSOFT_VDataReader_H 1
 
 namespace comptonsoft {
 
 /**
- * class VCSModule
+ * VDataReader
+ *
  * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
+ * @date 2019-11-12
  */
-class VCSModule : public anlnext::BasicModule
+class VDataReader
 {
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
 public:
-  VCSModule();
-  ~VCSModule();
-  
-  virtual anlnext::ANLStatus mod_initialize() override;
+  virtual void addFile(const std::string& filename) = 0;
+  virtual bool hasFile(const std::string& filename) const = 0;
+  virtual bool isDone() const = 0;
 
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
-
-protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
-
-private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
+  virtual std::string CurrentFilename() = 0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_VCSModule_H */
+#endif /* COMPTONSOFT_VDataReader_H */

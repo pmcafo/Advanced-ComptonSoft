@@ -17,52 +17,36 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
+/**
+ * virtual class of TTree format
+ * @author Hirokazu Odaka
+ * @date 2012-04-13
+ */
 
-#include <anlnext/BasicModule.hh>
-#include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
-
-class TDirectory;
+#include "TTree.h"
 
 namespace comptonsoft {
 
-/**
- * class VCSModule
- * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
- */
-class VCSModule : public anlnext::BasicModule
+class VTreeFormat
 {
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
 public:
-  VCSModule();
-  ~VCSModule();
-  
-  virtual anlnext::ANLStatus mod_initialize() override;
+  VTreeFormat() {}
+  virtual ~VTreeFormat() {}
 
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
+  virtual InitializeForWrite() = 0;
+  virtual InitializeForRead() = 0;
 
 protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
+  TBranch* Branch(const char* name, void* address, const char* leaflist,
+                  Int_t bufsize = 32000)
+  { return tree->Branch(name, address, leaflist, bufsize); }
+
+  Int_t SetBranchAddress(const char* bname, void* address,
+                         TBranch** ptr = 0)
+  { return tree->SetBranchAddress(bname, address, ptr); }
 
 private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
+  TTree* tree;
 };
 
-} /* namespace comptonsoft */
-
-#endif /* COMPTONSOFT_VCSModule_H */
+}

@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Hirokazu Odaka                                     *
+ * Copyright (c) 2019 Hirokazu Odaka                                     *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,52 +18,39 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
-
-#include <anlnext/BasicModule.hh>
-#include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
-
-class TDirectory;
-
-namespace comptonsoft {
-
 /**
- * class VCSModule
- * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
+ * WritePedestals.
+ *
+ * @author Hirokazu Odaka & Tsubasa Tamba
+ * @date 2019-05
+ * @date 2019-07-18 | merged to comptonsoft
+ * @date 2020-04-01 | v1.1
+ *
  */
-class VCSModule : public anlnext::BasicModule
+
+#ifndef COMPTONSOFT_WritePedestals_H
+#define COMPTONSOFT_WritePedestals_H 1
+
+#include "VCSModule.hh"
+
+namespace comptonsoft{
+
+class WritePedestals : public VCSModule
 {
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
+  DEFINE_ANL_MODULE(WritePedestals, 1.1);
+  // ENABLE_PARALLEL_RUN();
 public:
-  VCSModule();
-  ~VCSModule();
+  WritePedestals();
   
-  virtual anlnext::ANLStatus mod_initialize() override;
-
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
-
-protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
+public:
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_end_run() override;
 
 private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
+  std::string filename_;
+  int detector_id_ = 0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_VCSModule_H */
+#endif /* COMPTONSOFT_WritePedestals_H */

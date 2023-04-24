@@ -17,52 +17,41 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
+#ifndef COMPTONSOFT_WeightByInitialDirection_H
+#define COMPTONSOFT_WeightByInitialDirection_H 1
 
 #include <anlnext/BasicModule.hh>
 #include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
 
-class TDirectory;
+class TGraph;
+namespace anlgeant4 { class InitialInformation; }
 
 namespace comptonsoft {
 
 /**
- * class VCSModule
+ *
  * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
+ * @date 2017-04-27
  */
-class VCSModule : public anlnext::BasicModule
+class WeightByInitialDirection : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
+  DEFINE_ANL_MODULE(WeightByInitialDirection, 1.0);
 public:
-  VCSModule();
-  ~VCSModule();
+  WeightByInitialDirection();
+  ~WeightByInitialDirection() = default;
+
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
   
-  virtual anlnext::ANLStatus mod_initialize() override;
-
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
-
-protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
-
 private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
+  std::vector<double> m_DirZVector;
+  std::vector<double> m_WeightVector;
+
+  anlgeant4::InitialInformation* m_InitialInfo = nullptr;
+  std::unique_ptr<TGraph> m_WeightFunction;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_VCSModule_H */
+#endif /* COMPTONSOFT_WeightByInitialDirection_H */

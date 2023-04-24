@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,52 +18,47 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
+#ifndef COMPTONSOFT_WriteXrayEventTree_H
+#define COMPTONSOFT_WriteXrayEventTree_H 1
 
-#include <anlnext/BasicModule.hh>
+#include "VCSModule.hh"
 #include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
 
-class TDirectory;
+class TTree;
+
+namespace anlgeant4 {
+class InitialInformation;
+}
 
 namespace comptonsoft {
 
+class XrayEventTreeIO;
+class XrayEventCollection;
+
 /**
- * class VCSModule
+ * 
  * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
+ * @date 2019-06-05
+ * @date 2019-10-30 | use XrayEventCollection
  */
-class VCSModule : public anlnext::BasicModule
+class WriteXrayEventTree : public VCSModule
 {
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
+  DEFINE_ANL_MODULE(WriteXrayEventTree, 1.1);
 public:
-  VCSModule();
-  ~VCSModule();
-  
-  virtual anlnext::ANLStatus mod_initialize() override;
+  WriteXrayEventTree();
+  ~WriteXrayEventTree() = default;
 
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
-
-protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
+  std::string collectionModule_;
+  const XrayEventCollection* collection_ = nullptr;
+  TTree* tree_ = nullptr;
+  std::unique_ptr<XrayEventTreeIO> treeIO_ = nullptr;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_VCSModule_H */
+#endif /* COMPTONSOFT_WriteHitTree_H */

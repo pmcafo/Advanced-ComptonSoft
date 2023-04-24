@@ -17,52 +17,42 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
+#ifndef COMPTONSOFT_WriteComptonEventTree_H
+#define COMPTONSOFT_WriteComptonEventTree_H 1
 
-#include <anlnext/BasicModule.hh>
-#include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
+#include "VCSModule.hh"
 
-class TDirectory;
+class TTree;
+
+namespace anlgeant4 {
+class InitialInformation;
+}
 
 namespace comptonsoft {
 
-/**
- * class VCSModule
- * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
- */
-class VCSModule : public anlnext::BasicModule
-{
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
-public:
-  VCSModule();
-  ~VCSModule();
-  
-  virtual anlnext::ANLStatus mod_initialize() override;
+class EventReconstruction;
+class ComptonEventTreeIOWithInitialInfo;
 
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
+class WriteComptonEventTree : public VCSModule
+{
+  DEFINE_ANL_MODULE(WriteComptonEventTree, 2.0);
+public:
+  WriteComptonEventTree();
+  ~WriteComptonEventTree();
+
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
-
+  TTree * cetree_;
+  
 private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
+  EventReconstruction* eventReconstruction_;
+  const anlgeant4::InitialInformation* initialInfo_;
+  std::unique_ptr<ComptonEventTreeIOWithInitialInfo> treeIO_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_VCSModule_H */
+#endif /* COMPTONSOFT_WriteComptonEventTree_H */

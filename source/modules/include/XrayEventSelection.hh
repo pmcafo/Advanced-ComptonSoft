@@ -17,52 +17,12 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_VCSModule_H
-#define COMPTONSOFT_VCSModule_H 1
+#ifndef COMPTONSOFT_XrayEventSelection_H
+#define COMPTONSOFT_XrayEventSelection_H 1
 
-#include <anlnext/BasicModule.hh>
-#include <memory>
-#include "TCanvas.h"
-#include "DetectorSystem.hh"
-#include "VRealDetectorUnit.hh"
-
-class TDirectory;
+#include "XrayEventCollection.hh"
+#include <functional>
 
 namespace comptonsoft {
 
-/**
- * class VCSModule
- * @author Hirokazu Odaka
- * @date 2008-08-30
- * @date 2014-11-22
- * @date 2016-08-19 | Add isMCSimulation()
- * @date 2017-07-07 | merge mod_hist() to mod_initialize()
- * @date 2019-11-21 | 1.4 | drawCanvas()
- * @date 2023-09-13 | 1.5 | chdir()
- */
-class VCSModule : public anlnext::BasicModule
-{
-  DEFINE_ANL_MODULE(VCSModule, 1.5);
-public:
-  VCSModule();
-  ~VCSModule();
-  
-  virtual anlnext::ANLStatus mod_initialize() override;
-
-  virtual void drawCanvas(TCanvas*, std::vector<std::string>* /* filenames */) {};
-
-protected:
-  void mkdir(const std::string& name="");
-  void chdir(const std::string& name="");
-  DetectorSystem* getDetectorManager() { return detectorSystem_; }
-  const DetectorSystem* getDetectorManager() const { return detectorSystem_; }
-  bool isMCSimulation() const { return detectorSystem_->isMCSimulation(); }
-
-private:
-  DetectorSystem* detectorSystem_;
-  TDirectory* saveDir_;
-};
-
-} /* namespace comptonsoft */
-
-#endif /* COMPTONSOFT_VCSModule_H */
+class XrayEve
