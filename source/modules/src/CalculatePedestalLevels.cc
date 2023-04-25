@@ -125,4 +125,38 @@ ANLStatus CalculatePedestalLevels::mod_end_run()
   const int RangeHalfWidth = m_AverageRangeHalfWidth;
 
   std::vector<TH1*>::iterator itHisSpec = m_hisSpec.begin();
-  std::vector<TH1*>::iterator itHisPed = m_hisPed.begin(
+  std::vector<TH1*>::iterator itHisPed = m_hisPed.begin();
+  std::vector<TH1*>::iterator itHisNoise = m_hisNoise.begin();
+
+  DetectorSystem* detectorManager = getDetectorManager();
+  const int NumROM = detectorManager->NumberOfReadoutModules();
+  for (int i=0; i<NumROM; i++) {
+    const ReadoutModule* ROM
+      = detectorManager->getReadoutModuleByIndex(i);
+    const int NumSections = ROM->NumberOfSections();
+    for (int j=0; j<NumSections; j++) {
+      const DetectorBasedChannelID section = ROM->getSection(j);
+      const MultiChannelData* mcd = detectorManager->getMultiChannelData(section);
+      const int NumChannels = mcd->NumberOfChannels();
+      for (int k=0; k<NumChannels; k++) {
+        (*itHisSpec)->GetXaxis()->SetRange(SearchMin, SearchMax);
+        int centerbin = (*itHisSpec)->GetMaximumBin();
+        int minbin = centerbin - RangeHalfWidth;
+        int maxbin = centerbin + RangeHalfWidth;
+        (*itHisSpec)->GetXaxis()->SetRange(minbin, maxbin);
+        double pedestalMean = (*itHisSpec)->GetMean();
+        (*itHisPed)->SetBinContent(k+1, pedestalMean);
+        (*itHisSpec)->GetXaxis()->SetRange();
+        double pedestalRMS = (*itHisSpec)->GetRMS();
+        (*itHisNoise)->SetBinContent(k+1, pedestalRMS);
+        *itHisSpec++;
+      }
+      itHisPed++;
+      itHisNoise++;
+    }
+  }
+ 
+  return AS_OK;
+}
+
+} /* namespace comptonsoft */
