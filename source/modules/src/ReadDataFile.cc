@@ -17,41 +17,42 @@
  *                                                                       *
  *************************************************************************/
 
-#include "LoadReducedFrame.hh"
-#include "TTree.h"
-#include "TFile.h"
-#include "FrameData.hh"
+#include "ReadDataFile.hh"
 
 using namespace anlnext;
 
-namespace comptonsoft {
-
-LoadReducedFrame::LoadReducedFrame()
+namespace comptonsoft
 {
+
+ReadDataFile::ReadDataFile()
+  : m_EventID(0), m_Time(0)
+{
+  add_alias("ReadDataFile");
 }
 
-bool LoadReducedFrame::load(FrameData* frame, const std::string& filename)
+ANLStatus ReadDataFile::mod_define()
 {
-  frame->resetRawFrame();
-  frame->clearEventCheckPixels();
-  image_t& rawFrame = frame->getRawFrame();
+  register_parameter(&m_FileList, "file_list");
+  return AS_OK;
+}
 
-  TFile f(filename.c_str());
-  TTree* tree = static_cast<TTree*>(f.Get("rawtree"));
-  int ix = 0;
-  int iy = 0;
-  double ph = 0;
-  tree->SetBranchAddress("ph", &ph);
-  tree->SetBranchAddress("x", &ix);
-  tree->SetBranchAddress("y", &iy);
-  const int num_entries = tree->GetEntries();
-  for (int i=0; i<num_entries; i++) {
-    tree->GetEntry(i);
-    rawFrame[ix][iy] = ph;
-    frame->addEventCheckPixels(ix, iy);
+ANLStatus ReadDataFile::mod_initialize()
+{
+  m_FileIterator = m_FileList.begin();
+  return AS_OK;
+}
+
+bool ReadDataFile::checkFiles()
+{
+  for (auto& filename: m_FileList) {
+    std::ifstream fin;
+    fin.open( filename.c_str() );
+    if (!fin) {
+      std::cout << "ReadDataFile: cannot open " << filename << std::endl;
+      return false;
+    }
+    fin.close();
   }
-  f.Close();
-
   return true;
 }
 

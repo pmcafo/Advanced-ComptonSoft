@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,42 +18,45 @@
  *                                                                       *
  *************************************************************************/
 
-#include "LoadReducedFrame.hh"
-#include "TTree.h"
-#include "TFile.h"
-#include "FrameData.hh"
+#include "MakeDetectorHitsWithTimingProcess.hh"
 
-using namespace anlnext;
+#include <iostream>
+#include <algorithm>
+#include "DeviceSimulation.hh"
+#include "FlagDefinition.hh"
 
-namespace comptonsoft {
-
-LoadReducedFrame::LoadReducedFrame()
+namespace comptonsoft
 {
-}
 
-bool LoadReducedFrame::load(FrameData* frame, const std::string& filename)
+void MakeDetectorHitsWithTimingProcess::doProcessing()
 {
-  frame->resetRawFrame();
-  frame->clearEventCheckPixels();
-  image_t& rawFrame = frame->getRawFrame();
-
-  TFile f(filename.c_str());
-  TTree* tree = static_cast<TTree*>(f.Get("rawtree"));
-  int ix = 0;
-  int iy = 0;
-  double ph = 0;
-  tree->SetBranchAddress("ph", &ph);
-  tree->SetBranchAddress("x", &ix);
-  tree->SetBranchAddress("y", &iy);
-  const int num_entries = tree->GetEntries();
-  for (int i=0; i<num_entries; i++) {
-    tree->GetEntry(i);
-    rawFrame[ix][iy] = ph;
-    frame->addEventCheckPixels(ix, iy);
+  DetectorSystem* detectorManager = getDetectorManager();
+  auto dsVector = detectorManager->getDeviceSimulationVector();
+  for (auto ds: dsVector) {
+    ds->prepareForTimingProcess();
   }
-  f.Close();
 
-  return true;
+  for (int timeGroup=0; ; timeGroup++) {
+    std::vector<double> triggerTimes;
+    for (auto ds: dsVector) {
+      if (ds->isSelfTriggered()) {
+        triggerTimes.push_back(ds->FirstTriggerTime());
+      }
+    }
+    if (triggerTimes.empty()) {
+      break;
+    }
+    const double triggerTime = *std::min_element(triggerTimes.begin(),
+                                                 triggerTimes.end());
+    for (auto ds: dsVector) {
+      ds->makeDetectorHitsAtTime(triggerTime, timeGroup);
+    }
+  }
+
+  for (auto& detector: detectorManager->getDetectors()) {
+    detector->assignReadoutInfo();
+    detector->reconstructHits();
+  }
 }
 
 } /* namespace comptonsoft */

@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,41 +18,42 @@
  *                                                                       *
  *************************************************************************/
 
-#include "LoadReducedFrame.hh"
-#include "TTree.h"
-#include "TFile.h"
-#include "FrameData.hh"
+#include "MakeRawHits.hh"
 
-using namespace anlnext;
+#include <iostream>
+#include "DeviceSimulation.hh"
 
-namespace comptonsoft {
-
-LoadReducedFrame::LoadReducedFrame()
+namespace comptonsoft
 {
+
+anlnext::ANLStatus MakeRawHits::mod_define()
+{
+  SelectHits::mod_define();
+  hide_parameter("analysis_map");
+  return anlnext::AS_OK;
 }
 
-bool LoadReducedFrame::load(FrameData* frame, const std::string& filename)
+void MakeRawHits::doProcessing()
 {
-  frame->resetRawFrame();
-  frame->clearEventCheckPixels();
-  image_t& rawFrame = frame->getRawFrame();
-
-  TFile f(filename.c_str());
-  TTree* tree = static_cast<TTree*>(f.Get("rawtree"));
-  int ix = 0;
-  int iy = 0;
-  double ph = 0;
-  tree->SetBranchAddress("ph", &ph);
-  tree->SetBranchAddress("x", &ix);
-  tree->SetBranchAddress("y", &iy);
-  const int num_entries = tree->GetEntries();
-  for (int i=0; i<num_entries; i++) {
-    tree->GetEntry(i);
-    rawFrame[ix][iy] = ph;
-    frame->addEventCheckPixels(ix, iy);
+  DetectorSystem* detectorManager = getDetectorManager();
+  for (auto ds: detectorManager->getDeviceSimulationVector()) {
+    ds->makeRawDetectorHits();
   }
-  f.Close();
 
+  for (auto& detector: detectorManager->getDetectors()) {
+    detector->reconstructHits();
+  }
+}
+
+bool MakeRawHits::setAnalysisParam()
+{
+  DetectorSystem* detectorManager = getDetectorManager();
+  for (auto& detector: detectorManager->getDetectors()) {
+    detector->setReconstructionMode(0);
+  }
+  for (auto ds: detectorManager->getDeviceSimulationVector()) {
+    ds->resetThresholdVector(0.0);
+  }
   return true;
 }
 
