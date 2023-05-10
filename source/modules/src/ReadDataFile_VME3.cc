@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,9 +18,11 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ReadDataFile_SpW2.hh"
+#include "ReadDataFile_VME3.hh"
+
 #include <iostream>
 #include <iomanip>
+
 #include "ReadoutModule.hh"
 #include "MultiChannelData.hh"
 
@@ -28,25 +31,19 @@ using namespace anlnext;
 namespace comptonsoft
 {
 
-ReadDataFile_SpW2::ReadDataFile_SpW2()
-  : m_ReadPacketSize(0), m_DeltaTime(0)
+ReadDataFile_VME3::ReadDataFile_VME3()
+  : m_ReadPacketSize(0), m_DeadTime(0)
 {
 }
 
-ANLStatus ReadDataFile_SpW2::mod_define()
+ANLStatus ReadDataFile_VME3::mod_define()
 {
   m_ReadPacketSize = HEADER_SIZE;
-
-  define_evs("ReadDataFile_SpW2:Error1");
-  define_evs("ReadDataFile_SpW2:Error2");
-  define_evs("ReadDataFile_SpW2:Error3");
-  define_evs("ReadDataFile_SpW2:Error4");
-  define_evs("ReadDataFile_SpW2:Error5");
 
   return ReadDataFile::mod_define();
 }
 
-ANLStatus ReadDataFile_SpW2::mod_initialize()
+ANLStatus ReadDataFile_VME3::mod_initialize()
 {
   ReadDataFile::mod_initialize();
 
@@ -62,7 +59,9 @@ ANLStatus ReadDataFile_SpW2::mod_initialize()
       MultiChannelData* mcd = detectorManager->getMultiChannelData(section);
       readPacketSize += ( mcd->NumberOfChannels() * sizeof(short) );
     }
+    readPacketSize += (DATA_FOOTER_LENGTH * sizeof(short));
   }
+  readPacketSize += FOOTER_SIZE;
 
   std::cout << std::endl;
   std::cout << "Data size: " << readPacketSize << std::endl;
@@ -77,7 +76,7 @@ ANLStatus ReadDataFile_SpW2::mod_initialize()
   return AS_OK;
 }
 
-ANLStatus ReadDataFile_SpW2::mod_begin_run()
+ANLStatus ReadDataFile_VME3::mod_begin_run()
 {
   if (wasLastFile()) {
     std::cout << "The file list seems empty." << std::endl;
@@ -93,10 +92,10 @@ ANLStatus ReadDataFile_SpW2::mod_begin_run()
   return AS_OK;
 }
 
-ANLStatus ReadDataFile_SpW2::mod_analyze()
+ANLStatus ReadDataFile_VME3::mod_analyze()
 {
   static unsigned char buf[READ_BUF_SIZE];
-
+  
  read_start:
   m_fin.read((char*)buf, m_ReadPacketSize);
 
@@ -123,82 +122,64 @@ ANLStatus ReadDataFile_SpW2::mod_analyze()
   unsigned char* p = buf;
 
   // read Header of one event
-  p += 4;
-
-  int errcode = static_cast<int>(*p);
-  if (errcode == 1) {
-    set_evs("ReadDataFile_SpW2:Error1");
-  }
-  else if (errcode == 2) {
-    set_evs("ReadDataFile_SpW2:Error2");
-  }
-  else if (errcode == 3) {
-    set_evs("ReadDataFile_SpW2:Error3");
-  }
-  else if (errcode == 4) {
-    set_evs("ReadDataFile_SpW2:Error4");
-  }
-  else if (errcode == 5) {
-    set_evs("ReadDataFile_SpW2:Error5");
-  }
-  
-  if (errcode != 0 && errcode != 2) {
-    return AS_SKIP;
-  }
-
-  p += 4;
-  
+  //p += 4;
+  p += 2;
+	
+  unsigned short deadtime = 0;
+  deadtime += static_cast<unsigned short>(*(p++))<<0;
+  deadtime += static_cast<unsigned short>(*(p++))<<8;
+  m_DeadTime = deadtime;
+	
   int unixtime = 0;
-  unixtime += static_cast<int>(*(p++))<<24;
-  unixtime += static_cast<int>(*(p++))<<16;
-  unixtime += static_cast<int>(*(p++))<<8;
   unixtime += static_cast<int>(*(p++))<<0;
+  unixtime += static_cast<int>(*(p++))<<8;
+  unixtime += static_cast<int>(*(p++))<<16;
+  unixtime += static_cast<int>(*(p++))<<24;
   setTime(unixtime);
 
-  p = buf + HEADER_SIZE;
+#if 0
+  ULong64_t eventid = 0;
+  eventid += static_cast<ULong64_t>(*(p++))<<0;
+  eventid += static_cast<ULong64_t>(*(p++))<<8;
+  eventid += static_cast<ULong64_t>(*(p++))<<16;
+  eventid += static_cast<ULong64_t>(*(p++))<<24;
+  eventid += static_cast<ULong64_t>(*(p++))<<32;
+  eventid += static_cast<ULong64_t>(*(p++))<<40;
+  eventid += static_cast<ULong64_t>(*(p++))<<48;
+  eventid += static_cast<ULong64_t>(*(p++))<<56;
+#endif
 
-  int deltaTime = 0x10000;
-  
   DetectorSystem* detectorManager = getDetectorManager();
   for (auto& readoutModule: detectorManager->getReadoutModules()) {
     // read Header of one module
     for (int i=0; i<DATA_HEADER_LENGTH; i++) {
-      unsigned short int tmp;
-      tmp = (static_cast<unsigned short int>(*(p+1))<<8) + *p;
-
-      if (i==3) {
-        if (tmp < deltaTime) {
-          deltaTime = tmp;
-        }
-      }
       p+=2;
     }
 
-    // read data body
     for (auto& section: readoutModule->Sections()) {
       MultiChannelData* mcd = detectorManager->getMultiChannelData(section);
       int nCh = mcd->NumberOfChannels();
       for (int i=0; i<nCh; i++) {
-        unsigned int data;
-        data = (static_cast<unsigned short int>(*(p+1))<<8) + *p;
-        data = data & 0x0FFFu;
-        int rawadc;
-        if ((data&0x800u) == 0x800u) {
-          // data is negative
-          rawadc = static_cast<signed int>(data+0xFFFFF000u);
-        }
-        else {
-          rawadc = data;
-        }
-        
+        unsigned short int adc_value;
+        adc_value = (static_cast<unsigned short int>(*(p+1))<<8) + *p;
+        adc_value = adc_value & 0x0FFFu;
+        int rawadc = static_cast<int>(adc_value);
         mcd->setRawADC(i, rawadc);
         p+=2;
       }
     }
+
+    // read Footer of one module
+    for (int i=0; i<DATA_FOOTER_LENGTH; i++) {
+      p+=2;
+    }
   }
 
-  m_DeltaTime = deltaTime;
-   
+  // read Footer of one event
+  for (int i=0; i<FOOTER_SIZE; i++) {
+    p++;
+  }
+
   return ReadDataFile::mod_analyze();
 }
 
