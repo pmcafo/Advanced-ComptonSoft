@@ -17,53 +17,72 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteXrayEventTree.hh"
-#include "TTree.h"
-#include "InitialInformation.hh"
-#include "XrayEvent.hh"
-#include "XrayEventTreeIO.hh"
-#include "AnalyzeFrame.hh"
+#ifndef COMPTONSOFT_GenerateSimXEvent_H
+#define COMPTONSOFT_GenerateSimXEvent_H 1
 
-using namespace anlnext;
+#include <anlnext/BasicModule.hh>
 
-namespace comptonsoft
+namespace comptonsoft {
+
+class SimXIF;
+class CSHitCollection;
+
+
+class GenerateSimXEvent : public anlnext::BasicModule
 {
-
-WriteXrayEventTree::WriteXrayEventTree()
-  : collectionModule_("XrayEventCollection"),
-    treeIO_(new XrayEventTreeIO)
-{
-}
-
-ANLStatus WriteXrayEventTree::mod_define()
-{
-  define_parameter("collection_module", &mod_class::collectionModule_);
+  DEFINE_ANL_MODULE(GenerateSimXEvent, 0.0);
+public:
+  GenerateSimXEvent();
+  ~GenerateSimXEvent() {}
   
-  return AS_OK;
-}
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_finalize() override;
 
-ANLStatus WriteXrayEventTree::mod_initialize()
-{
-  VCSModule::mod_initialize();
+protected:
+  CSHitCollection* m_HitCollection;
 
-  get_module(collectionModule_, &collection_);
-  define_evs("WriteXrayEventTree:Fill");
+  int eventid;
+  int seqnum;
+  int totalhit;
+  double ini_energy;
 
-  tree_ = new TTree("xetree", "xetree");
-  treeIO_->setTree(tree_);
-  treeIO_->defineBranches();
+  double realposx;
+  double realposy;
+  double realposz;
+
+  double localposx;
+  double localposy;
+  double localposz;
+
+  double posx;
+  double posy;
+  double posz;
+
+  double edep;
+  double e_pha;
+  double e_pi;
   
-  return AS_OK;
-}
+  double time1;
 
-ANLStatus WriteXrayEventTree::mod_analyze()
-{
-  const int n = treeIO_->fillEvents(collection_->getEvents());
-  if (n>0) {
-    set_evs("WriteXrayEventTree:Fill");
-  }
+  unsigned int process;
   
-  return AS_OK;
-}
+  int grade;
+  
+  int detid;
+  int stripx;
+  int stripy;
+  int chip;
+  int channel;
+
+  int time_group;
+
+  unsigned int flag;
+
+private:
+  SimXIF* m_SimXIF;
+};
 
 } /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_GenerateSimXEvent_H */

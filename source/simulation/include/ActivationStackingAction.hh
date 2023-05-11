@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Hirokazu Odaka                                     *
+ * Copyright (c) 2012 Hirokazu Odaka, Makoto Asai                        *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,53 +18,32 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteXrayEventTree.hh"
-#include "TTree.h"
-#include "InitialInformation.hh"
-#include "XrayEvent.hh"
-#include "XrayEventTreeIO.hh"
-#include "AnalyzeFrame.hh"
+#ifndef COMPTONSOFT_ActivationStackingAction_H
+#define COMPTONSOFT_ActivationStackingAction_H 1
 
-using namespace anlnext;
+#include "G4UserStackingAction.hh"
 
-namespace comptonsoft
+class G4Track;
+
+namespace comptonsoft {
+
+
+/**
+ * Geant4 user statiking action for radioactivation simulations.
+ *
+ * @author Hirokazu Odaka, Makoto Asai
+ * @date 2012-03-07
+ */
+class ActivationStackingAction : public G4UserStackingAction
 {
-
-WriteXrayEventTree::WriteXrayEventTree()
-  : collectionModule_("XrayEventCollection"),
-    treeIO_(new XrayEventTreeIO)
-{
-}
-
-ANLStatus WriteXrayEventTree::mod_define()
-{
-  define_parameter("collection_module", &mod_class::collectionModule_);
+public:
+  ActivationStackingAction();
+  virtual ~ActivationStackingAction();
   
-  return AS_OK;
-}
-
-ANLStatus WriteXrayEventTree::mod_initialize()
-{
-  VCSModule::mod_initialize();
-
-  get_module(collectionModule_, &collection_);
-  define_evs("WriteXrayEventTree:Fill");
-
-  tree_ = new TTree("xetree", "xetree");
-  treeIO_->setTree(tree_);
-  treeIO_->defineBranches();
-  
-  return AS_OK;
-}
-
-ANLStatus WriteXrayEventTree::mod_analyze()
-{
-  const int n = treeIO_->fillEvents(collection_->getEvents());
-  if (n>0) {
-    set_evs("WriteXrayEventTree:Fill");
-  }
-  
-  return AS_OK;
-}
+public:
+  G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* aTrack) override;
+};
 
 } /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_ActivationStackingAction_H */

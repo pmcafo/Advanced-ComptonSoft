@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Hirokazu Odaka                                     *
+ * Copyright (c) 2013 Tamotsu Sato, Hirokazu Odaka                       *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,53 +18,45 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteXrayEventTree.hh"
-#include "TTree.h"
-#include "InitialInformation.hh"
-#include "XrayEvent.hh"
-#include "XrayEventTreeIO.hh"
-#include "AnalyzeFrame.hh"
+#ifndef COMPTONSOFT_AHRadiationBackgroundPrimaryGen_H
+#define COMPTONSOFT_AHRadiationBackgroundPrimaryGen_H 1
 
-using namespace anlnext;
+#include "IsotropicPrimaryGen.hh"
+#include <memory>
 
-namespace comptonsoft
+class TFile;
+class TH1D;
+
+
+namespace comptonsoft {
+
+/**
+ * ANLGeant4 primary generator reading the ASTRO-H radiation-background files.
+ *
+ * @author Tamotsu Sato
+ * @date 2013-04-11 | Tamotsu Sato | ver 1.0: based on IsotropicPrimaryGen
+ * @date 2013-05-03 | Tamotsu Sato & Hirokazu Odaka | ver 1.1 bug fix: unit conversion
+ * @date 2017-03-23 | Hirokazu Odaka | use unique_ptr for root File.
+ * @date 2017-07-27 | Hirokazu Odaka | tweak.
+ */
+class AHRadiationBackgroundPrimaryGen : public anlgeant4::IsotropicPrimaryGen
 {
+  DEFINE_ANL_MODULE(AHRadiationBackgroundPrimaryGen, 4.1);
+public:
+  AHRadiationBackgroundPrimaryGen();
+  ~AHRadiationBackgroundPrimaryGen();
 
-WriteXrayEventTree::WriteXrayEventTree()
-  : collectionModule_("XrayEventCollection"),
-    treeIO_(new XrayEventTreeIO)
-{
-}
-
-ANLStatus WriteXrayEventTree::mod_define()
-{
-  define_parameter("collection_module", &mod_class::collectionModule_);
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
   
-  return AS_OK;
-}
+  G4double sampleEnergy() override;
 
-ANLStatus WriteXrayEventTree::mod_initialize()
-{
-  VCSModule::mod_initialize();
-
-  get_module(collectionModule_, &collection_);
-  define_evs("WriteXrayEventTree:Fill");
-
-  tree_ = new TTree("xetree", "xetree");
-  treeIO_->setTree(tree_);
-  treeIO_->defineBranches();
-  
-  return AS_OK;
-}
-
-ANLStatus WriteXrayEventTree::mod_analyze()
-{
-  const int n = treeIO_->fillEvents(collection_->getEvents());
-  if (n>0) {
-    set_evs("WriteXrayEventTree:Fill");
-  }
-  
-  return AS_OK;
-}
+private:
+  std::string m_Filename;
+  std::unique_ptr<TFile> m_File;
+  TH1D* m_Hist;
+};
 
 } /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_AHRadiationBackgroundPrimaryGen_H */

@@ -17,53 +17,40 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteXrayEventTree.hh"
-#include "TTree.h"
-#include "InitialInformation.hh"
-#include "XrayEvent.hh"
-#include "XrayEventTreeIO.hh"
-#include "AnalyzeFrame.hh"
+#include "XrayEventCollection.hh"
 
 using namespace anlnext;
 
 namespace comptonsoft
 {
 
-WriteXrayEventTree::WriteXrayEventTree()
-  : collectionModule_("XrayEventCollection"),
-    treeIO_(new XrayEventTreeIO)
+XrayEventCollection::XrayEventCollection()
 {
 }
 
-ANLStatus WriteXrayEventTree::mod_define()
+XrayEventCollection::~XrayEventCollection() = default;
+
+ANLStatus XrayEventCollection::mod_begin_run()
 {
-  define_parameter("collection_module", &mod_class::collectionModule_);
-  
+  initializeEvent();
   return AS_OK;
 }
 
-ANLStatus WriteXrayEventTree::mod_initialize()
+ANLStatus XrayEventCollection::mod_analyze()
 {
-  VCSModule::mod_initialize();
-
-  get_module(collectionModule_, &collection_);
-  define_evs("WriteXrayEventTree:Fill");
-
-  tree_ = new TTree("xetree", "xetree");
-  treeIO_->setTree(tree_);
-  treeIO_->defineBranches();
-  
+  initializeEvent();
   return AS_OK;
 }
 
-ANLStatus WriteXrayEventTree::mod_analyze()
+ANLStatus XrayEventCollection::mod_end_run()
 {
-  const int n = treeIO_->fillEvents(collection_->getEvents());
-  if (n>0) {
-    set_evs("WriteXrayEventTree:Fill");
-  }
-  
+  initializeEvent();
   return AS_OK;
+}
+
+void XrayEventCollection::initializeEvent()
+{
+  events_.clear();
 }
 
 } /* namespace comptonsoft */

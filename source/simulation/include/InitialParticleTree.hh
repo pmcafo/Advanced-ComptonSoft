@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,53 +18,52 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteXrayEventTree.hh"
-#include "TTree.h"
-#include "InitialInformation.hh"
-#include "XrayEvent.hh"
-#include "XrayEventTreeIO.hh"
-#include "AnalyzeFrame.hh"
+#ifndef COMPTONSOFT_InitialParticleTree_H
+#define COMPTONSOFT_InitialParticleTree_H 1
 
-using namespace anlnext;
+#include "VCSModule.hh"
 
-namespace comptonsoft
-{
+class TTree;
 
-WriteXrayEventTree::WriteXrayEventTree()
-  : collectionModule_("XrayEventCollection"),
-    treeIO_(new XrayEventTreeIO)
-{
+namespace anlgeant4 {
+
+class InitialInformation;
+
 }
 
-ANLStatus WriteXrayEventTree::mod_define()
+namespace comptonsoft {
+
+class InitialParticleTree : public VCSModule
 {
-  define_parameter("collection_module", &mod_class::collectionModule_);
-  
-  return AS_OK;
-}
+  DEFINE_ANL_MODULE(InitialParticleTree, 1.1);
+public:
+  InitialParticleTree();
+  ~InitialParticleTree() {}
 
-ANLStatus WriteXrayEventTree::mod_initialize()
-{
-  VCSModule::mod_initialize();
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
-  get_module(collectionModule_, &collection_);
-  define_evs("WriteXrayEventTree:Fill");
+protected:
+  int eventid;
+  double ini_energy;
+  double ini_dirx;
+  double ini_diry;
+  double ini_dirz;
+  double ini_time;
+  double ini_posx;
+  double ini_posy;
+  double ini_posz;
+  double ini_polarx;
+  double ini_polary;
+  double ini_polarz;
+  double weight;
 
-  tree_ = new TTree("xetree", "xetree");
-  treeIO_->setTree(tree_);
-  treeIO_->defineBranches();
-  
-  return AS_OK;
-}
-
-ANLStatus WriteXrayEventTree::mod_analyze()
-{
-  const int n = treeIO_->fillEvents(collection_->getEvents());
-  if (n>0) {
-    set_evs("WriteXrayEventTree:Fill");
-  }
-  
-  return AS_OK;
-}
+private:
+  const anlgeant4::InitialInformation* initial_info;
+  bool polarization_enable;
+  TTree* tree;
+};
 
 } /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_InitialParticleTree_H */

@@ -1,6 +1,7 @@
+
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Hirokazu Odaka                                     *
+ * Copyright (c) 2011 Tamotsu Sato, Hirokazu Odaka                       *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,53 +18,51 @@
  *                                                                       *
  *************************************************************************/
 
-#include "WriteXrayEventTree.hh"
-#include "TTree.h"
-#include "InitialInformation.hh"
-#include "XrayEvent.hh"
-#include "XrayEventTreeIO.hh"
-#include "AnalyzeFrame.hh"
+#ifndef COMPTONSOFT_AHRayTracingPrimaryGen_H
+#define COMPTONSOFT_AHRayTracingPrimaryGen_H 1
 
-using namespace anlnext;
+#include <vector>
+#include "BasicPrimaryGen.hh"
 
-namespace comptonsoft
+namespace comptonsoft {
+
+
+/**
+ * ANLGeant4 PrimaryGen module.
+ * Primary particles are generated according to a list of ray-tracing output.
+ *
+ * @author Tamotsu Sato, Hirokazu Odaka
+ * @date 2011-11-07
+ * @date 2012-06-13
+ * @date 2012-09-14
+ * @date 2017-07-27 | makePrimarySetting()
+ * @date 2019-07-01 | m_EnergyResample by Tsubasa Tamba
+ */
+class AHRayTracingPrimaryGen : public anlgeant4::BasicPrimaryGen
 {
-
-WriteXrayEventTree::WriteXrayEventTree()
-  : collectionModule_("XrayEventCollection"),
-    treeIO_(new XrayEventTreeIO)
-{
-}
-
-ANLStatus WriteXrayEventTree::mod_define()
-{
-  define_parameter("collection_module", &mod_class::collectionModule_);
+  DEFINE_ANL_MODULE(AHRayTracingPrimaryGen, 4.1);
+public:
+  AHRayTracingPrimaryGen();
   
-  return AS_OK;
-}
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
-ANLStatus WriteXrayEventTree::mod_initialize()
-{
-  VCSModule::mod_initialize();
-
-  get_module(collectionModule_, &collection_);
-  define_evs("WriteXrayEventTree:Fill");
-
-  tree_ = new TTree("xetree", "xetree");
-  treeIO_->setTree(tree_);
-  treeIO_->defineBranches();
+  void makePrimarySetting() override;
   
-  return AS_OK;
-}
-
-ANLStatus WriteXrayEventTree::mod_analyze()
-{
-  const int n = treeIO_->fillEvents(collection_->getEvents());
-  if (n>0) {
-    set_evs("WriteXrayEventTree:Fill");
-  }
+private:
+  std::string m_FileName;
   
-  return AS_OK;
-}
+  int m_EventNum;
+  int m_ID;
+
+  static const int NumColumns = 6;
+  std::vector<double> m_Columns[6];
+  G4ThreeVector m_offset;
+
+  bool m_EnergyResample = false;
+};
 
 } /* namespace comptonsoft */
+
+#endif /* COMPTONSOFT_AHRayTracePrimaryGen_H */
