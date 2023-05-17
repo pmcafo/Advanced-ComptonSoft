@@ -17,43 +17,57 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_PhysicsListManager_H
+#define COMPTONSOFT_PhysicsListManager_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+#include <string>
+#include "VANLPhysicsList.hh"
+#include "CSPhysicsList.hh"
 
-namespace comptonsoft {
-
+namespace comptonsoft
+{
 
 /**
- * PickUpData for observation from outside of the world.
+ * ANL Geant4 physics list module for X-ray and soft gamma-ray simulations.
+ * This is a standard physics list module for ASTRO-H.
  *
  * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
+ * @date 2011-xx-xx
+ * @date 2012-05-30
+ * @date 2015-06-10 | version 2.0
+ * @date 2016-12-16 | version 2.1 | introduce parameter nuclear_lifetime_threshold.
  */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class PhysicsListManager : public anlgeant4::VANLPhysicsList
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
+  DEFINE_ANL_MODULE(PhysicsListManager, 2.1);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
+  PhysicsListManager();
+  ~PhysicsListManager() = default;
   
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_pre_initialize() override;
+  anlnext::ANLStatus mod_initialize() override;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
+  G4VUserPhysicsList* create() override;
 
 private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  std::string m_PhysicsListName;
+  bool m_EMPolarization;
+  bool m_EMCustomized;
+  bool m_EMOptionFluo;
+  bool m_EMOptionAuger;
+  bool m_EMOptionPIXE;
+  double m_ElectronRangeRatio;
+  double m_ElectronFinalRange;
+  bool m_HadronHP;
+  std::string m_HadronModel;
+  double m_NuclearLifeTimeThreshold;
+  bool m_RDEnabled;
+  bool m_ParallelWorldEnabled;
+  double m_DefaultCut;
+  CSPhysicsOption m_PhysicsOption;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_PhysicsListManager_H */

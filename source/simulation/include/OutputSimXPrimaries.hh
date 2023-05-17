@@ -17,43 +17,29 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_OutputSimXPrimaries_H
+#define COMPTONSOFT_OutputSimXPrimaries_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+#include <anlnext/BasicModule.hh>
 
 namespace comptonsoft {
 
 
-/**
- * PickUpData for observation from outside of the world.
- *
- * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
- */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class OutputSimXPrimaries : public anlnext::BasicModule
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
+  DEFINE_ANL_MODULE(OutputSimXPrimaries, 0.1);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
+  OutputSimXPrimaries();
+  ~OutputSimXPrimaries() {}
   
   anlnext::ANLStatus mod_define() override;
-
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
-
+  anlnext::ANLStatus mod_initialize() override;
+  
 private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  std::string m_FileName;
+  double m_Area;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_OutputSimXPrimaries_H */

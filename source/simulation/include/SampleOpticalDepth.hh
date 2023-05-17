@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Hirokazu Odaka                                     *
+ * Copyright (c) 2011 Tamotsu Sato, Hirokazu Odaka                       *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,43 +17,59 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_SampleOpticalDepth_H
+#define COMPTONSOFT_SampleOpticalDepth_H 1
 
 #include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+
+class TTree;
+class G4VEmProcess;
+
+namespace anlgeant4 {
+
+class InitialInformation;
+
+}
 
 namespace comptonsoft {
 
-
 /**
- * PickUpData for observation from outside of the world.
- *
- * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
+ * @author Hirokazu Odaka, Tamotsu Sato
+ * @date 2017-07-29 | Hirokazu Odaka | new design of VAppendableUserActionAssembly, code cleanup.
  */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class SampleOpticalDepth : public anlgeant4::VAppendableUserActionAssembly
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
+  DEFINE_ANL_MODULE(SampleOpticalDepth, 2.0);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
+  SampleOpticalDepth();
   
   anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
 
   void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
-
+  void EventActionAtEnd(const G4Event*) override;
+  void SteppingAction(const G4Step* aStep) override;
+  
 private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  double energy_;
+  std::string processName_;
+  std::string particleName_;
+  
+  const anlgeant4::InitialInformation* initialInfo_ = nullptr;
+  G4VEmProcess* process_ = nullptr;
+
+  TTree* tree_ = nullptr;
+  
+  double ini_posx_ = 0.0;
+  double ini_posy_ = 0.0;
+  double ini_posz_ = 0.0;
+  double ini_dirx_ = 0.0;
+  double ini_diry_ = 0.0;
+  double ini_dirz_ = 0.0;
+  double length_ = 0.0;
+  double tau_ = 0.0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_SampleOpticalDepth_H */

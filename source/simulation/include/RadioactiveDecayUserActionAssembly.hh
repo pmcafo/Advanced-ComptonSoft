@@ -17,43 +17,45 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_RadioactiveDecayUserActionAssembly_H
+#define COMPTONSOFT_RadioactiveDecayUserActionAssembly_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+#include "StandardUserActionAssembly.hh"
 
 namespace comptonsoft {
 
 
 /**
- * PickUpData for observation from outside of the world.
+ * UserActionAssembly for radioactive decay.
  *
  * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
+ * @date 2008-08-27
+ * @date 2011-04-08
+ * @date 2016-06-29 | rename the module name.
+ * @date 2017-06-29 | new design of UserActionAssembly
+ * @date 2024-02-24 | process name as a member
  */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class RadioactiveDecayUserActionAssembly : public anlgeant4::StandardUserActionAssembly
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
+  DEFINE_ANL_MODULE(RadioactiveDecayUserActionAssembly, 3.1);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
+  RadioactiveDecayUserActionAssembly();
   
   anlnext::ANLStatus mod_define() override;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
+  void SteppingAction(const G4Step* aStep) override;
 
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
+  void SetTerminationTime(double v) { terminationTime_ = v; }
+  double TerminationTime() const { return terminationTime_; }
+
+  double FirstDecayTime() const { return firstDecayTime_; }
 
 private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  double terminationTime_;
+  double firstDecayTime_;
+  std::string radioactiveDecayProcessName_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_RadioactiveDecayUserActionAssembly_H */

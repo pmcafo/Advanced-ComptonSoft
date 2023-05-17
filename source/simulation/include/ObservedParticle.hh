@@ -17,43 +17,27 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_ObservedParticle_H
+#define COMPTONSOFT_ObservedParticle_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+#include "G4ThreeVector.hh"
+#include <memory>
 
 namespace comptonsoft {
 
-
-/**
- * PickUpData for observation from outside of the world.
- *
- * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
- */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+struct ObservedParticle
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
-public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
-  
-  anlnext::ANLStatus mod_define() override;
-
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
-
-private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  int particle = 0;
+  int trackid = 0;
+  double time = 0.0;
+  G4ThreeVector position = {0.0, 0.0, 0.0};
+  double energy = 0.0;
+  G4ThreeVector direction = {0.0, 0.0, 0.0};
+  G4ThreeVector polarization = {0.0, 0.0, 0.0};
 };
+
+using ObservedParticle_sptr = std::shared_ptr<ObservedParticle>;
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_ObservedParticle_H */

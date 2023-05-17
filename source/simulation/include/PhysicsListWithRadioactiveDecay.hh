@@ -17,43 +17,31 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_PhysicsListWithRadioactiveDecay_H
+#define COMPTONSOFT_PhysicsListWithRadioactiveDecay_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+#include "G4RadioactiveDecayPhysics.hh"
 
-namespace comptonsoft {
-
+namespace comptonsoft
+{
 
 /**
- * PickUpData for observation from outside of the world.
  *
  * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
+ * @date 2016-05-16
  */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+template <typename PhysicsList_t>
+class PhysicsListWithRadioactiveDecay : public PhysicsList_t
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
-  
-  anlnext::ANLStatus mod_define() override;
+  PhysicsListWithRadioactiveDecay()
+  {
+    this->RegisterPhysics( new G4RadioactiveDecayPhysics );
+  }
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
-
-private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  ~PhysicsListWithRadioactiveDecay() = default;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_PhysicsListWithRadioactiveDecay_H */

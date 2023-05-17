@@ -1,3 +1,4 @@
+
 /*************************************************************************
  *                                                                       *
  * Copyright (c) 2011 Hirokazu Odaka                                     *
@@ -17,43 +18,69 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_ObservationTreeIO_H
+#define COMPTONSOFT_ObservationTreeIO_H 1
 
-#include "VAppendableUserActionAssembly.hh"
+#include <cstdint>
+#include <vector>
+#include <utility>
 #include "ObservedParticle.hh"
+
+class TTree;
 
 namespace comptonsoft {
 
-
 /**
- * PickUpData for observation from outside of the world.
- *
+ * 
  * @author Hirokazu Odaka
  * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
  */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class ObservationTreeIO
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
+  ObservationTreeIO();
+  virtual ~ObservationTreeIO();
+
+  virtual void setTree(TTree* tree)
+  { tree_ = tree; }
+
+  virtual void defineBranches();
+  virtual void setBranchAddresses();
+
+  void fillParticles(int64_t eventID, const std::vector<ObservedParticle_sptr>& particles);
+
+  int64_t getEventID() const { return eventid_; }
+  int32_t getNumberOfParticles() const { return num_; }
+
+  ObservedParticle_sptr retrieveParticle() const;
+
+  std::pair<int64_t, std::vector<ObservedParticle_sptr>>
+  retrieveParticles(int64_t& entry,
+                    bool get_first_entry=true);
   
-  anlnext::ANLStatus mod_define() override;
-
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
-
 private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  TTree* tree_;
+
+  /*
+   * tree contents
+   */
+  int64_t eventid_ = 0;
+  int32_t num_ = 0;
+  int32_t trackid_ = 0;
+  int32_t particle_ = 0;
+  double time_ = 0.0;
+  float posx_ = 0.0;
+  float posy_ = 0.0;
+  float posz_ = 0.0;
+  float energy_ = 0.0;
+  float dirx_ = 0.0;
+  float diry_ = 0.0;
+  float dirz_ = 0.0;
+  float polarx_ = 0.0;
+  float polary_ = 0.0;
+  float polarz_ = 0.0;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_ObservationTreeIO_H */

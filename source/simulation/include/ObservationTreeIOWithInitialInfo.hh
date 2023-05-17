@@ -17,43 +17,30 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ObservationPickUpData_H
-#define COMPTONSOFT_ObservationPickUpData_H 1
+#ifndef COMPTONSOFT_ObservationTreeIOWithInitialInfo_H
+#define COMPTONSOFT_ObservationTreeIOWithInitialInfo_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-#include "ObservedParticle.hh"
+#include "ObservationTreeIO.hh"
+#include "InitialInfoTreeIO.hh"
 
 namespace comptonsoft {
 
-
 /**
- * PickUpData for observation from outside of the world.
- *
+ * 
  * @author Hirokazu Odaka
- * @date 2017-06-20
- * @date 2017-06-29 | new design of VAppendableUserActionAssembly
+ * @date 2017-06-21 | based on HitTreeIOWithInitialInfo
  */
-class ObservationPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class ObservationTreeIOWithInitialInfo : public ObservationTreeIO, public InitialInfoTreeIO
 {
-  DEFINE_ANL_MODULE(ObservationPickUpData, 2.0);
 public:
-  ObservationPickUpData();
-  ~ObservationPickUpData() = default;
-  
-  anlnext::ANLStatus mod_define() override;
+  ObservationTreeIOWithInitialInfo() = default;
+  ~ObservationTreeIOWithInitialInfo();
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void TrackActionAtEnd(const G4Track* track) override;
-
-  const std::vector<ObservedParticle_sptr>& getParticleVector() const 
-  { return particleVector_; }
-
-private:
-  bool recordPrimaries_;
-  std::vector<int> particleSelection_;
-  std::vector<ObservedParticle_sptr> particleVector_;
+  void setTree(TTree* tree) override;
+  void defineBranches() override;
+  void setBranchAddresses() override;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ObservationPickUpData_H */
+#endif /* COMPTONSOFT_ObservationTreeIOWithInitialInfo_H */
