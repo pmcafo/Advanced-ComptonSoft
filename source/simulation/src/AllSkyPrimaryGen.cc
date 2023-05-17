@@ -17,48 +17,41 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ScatteringPickUpData_H
-#define COMPTONSOFT_ScatteringPickUpData_H 1
+#include "AllSkyPrimaryGen.hh"
 
-#include "VAppendableUserActionAssembly.hh"
+#include <cmath>
+#include "Randomize.hh"
+#include "AstroUnits.hh"
 
-class TTree;
+using namespace anlnext;
+namespace unit = anlgeant4::unit;
 
-namespace comptonsoft {
 
-/**
- * PickUpData for first scattering
- *
- * @author Hirokazu Odaka
- * @date 2008-08-27
- * @date 2011-04-08
- * @date 2017-06-29 | redesign of VAppendableUserActionAssembly
- */
-class ScatteringPickUpData : public anlgeant4::VAppendableUserActionAssembly
+namespace comptonsoft
 {
-  DEFINE_ANL_MODULE(ScatteringPickUpData, 3.0);
-public:
-  ScatteringPickUpData();
-  
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void SteppingAction(const G4Step* aStep) override;
+AllSkyPrimaryGen::AllSkyPrimaryGen()
+  : filename_("allsky.fits"),
+    hdu_index_map_(2),
+    hdu_index_energy_(3),
+    origin_longitude_(0.0),
+    origin_latitude_(0.0),
+    pole_longitude_(0.0),
+    pole_latitude_(90.0*unit::degree)
+{
+  add_alias("AllSkyPrimaryGen");
+}
 
-private:
-  std::string processName_;
+AllSkyPrimaryGen::~AllSkyPrimaryGen() = default;
 
-  bool firstInteraction_ = false;
-  
-  TTree* tree_ = nullptr;
-  
-  double dirx_ = 0.0;
-  double diry_ = 0.0;
-  double dirz_ = 0.0;
-  double energy_ = 0.0;
-};
-
-} /* namespace comptonsoft */
-
-#endif /* COMPTONSOFT_ScatteringPickUpData_H */
+ANLStatus AllSkyPrimaryGen::mod_define()
+{
+  ANLStatus status = IsotropicPrimaryGen::mod_define();
+  if (status != AS_OK) {
+    return status;
+  }
+ 
+  define_parameter("filename", &mod_class::filename_);
+  define_parameter("hdu_index_map", &mod_class::hdu_index_map_);
+  define_parameter("hdu_index_energy", &mod_class::hdu_index_energy_);
+  define_parameter("origin_longitude_", &mod

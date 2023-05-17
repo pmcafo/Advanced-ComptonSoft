@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Copyright (c) 2011 Hirokazu Odaka                                     *
+ * Copyright (c) 2011 Hirokazu Odaka, Makoto Asai                        *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -17,48 +17,39 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ScatteringPickUpData_H
-#define COMPTONSOFT_ScatteringPickUpData_H 1
+#include "ActivationStackingAction.hh"
 
-#include "VAppendableUserActionAssembly.hh"
+#include "G4Track.hh"
+#include "G4ParticleTypes.hh"
 
-class TTree;
-
-namespace comptonsoft {
-
-/**
- * PickUpData for first scattering
- *
- * @author Hirokazu Odaka
- * @date 2008-08-27
- * @date 2011-04-08
- * @date 2017-06-29 | redesign of VAppendableUserActionAssembly
- */
-class ScatteringPickUpData : public anlgeant4::VAppendableUserActionAssembly
+namespace comptonsoft
 {
-  DEFINE_ANL_MODULE(ScatteringPickUpData, 3.0);
-public:
-  ScatteringPickUpData();
-  
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void SteppingAction(const G4Step* aStep) override;
+ActivationStackingAction::ActivationStackingAction() = default;
 
-private:
-  std::string processName_;
+ActivationStackingAction::~ActivationStackingAction() = default;
 
-  bool firstInteraction_ = false;
+G4ClassificationOfNewTrack 
+ActivationStackingAction::ClassifyNewTrack(const G4Track* aTrack)
+{
+  /* selection: fKill, fUrgent, fSuspend */
+  G4ClassificationOfNewTrack classification = fUrgent;
   
-  TTree* tree_ = nullptr;
+  /* kill if the particle is not relevant to radioactivation */
+  if (aTrack->GetParentID() != 0) {
+    G4ParticleDefinition* particleType = aTrack->GetDefinition();
+    if ((particleType == G4Gamma::GammaDefinition())
+        || (particleType == G4Electron::ElectronDefinition())
+        || (particleType == G4Positron::PositronDefinition())
+        || (particleType == G4NeutrinoE::NeutrinoEDefinition())
+        || (particleType == G4AntiNeutrinoE::AntiNeutrinoEDefinition())) {
+      
+      classification = fKill;
+      // G4cout << "ClassifyNewTrack() -- kill" << G4endl;
+    }
+  }
   
-  double dirx_ = 0.0;
-  double diry_ = 0.0;
-  double dirz_ = 0.0;
-  double energy_ = 0.0;
-};
+  return classification;
+}
 
 } /* namespace comptonsoft */
-
-#endif /* COMPTONSOFT_ScatteringPickUpData_H */

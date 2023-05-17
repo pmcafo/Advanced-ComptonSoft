@@ -17,48 +17,50 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ScatteringPickUpData_H
-#define COMPTONSOFT_ScatteringPickUpData_H 1
+#ifndef COMPTONSOFT_SimXPrimaryGen_H
+#define COMPTONSOFT_SimXPrimaryGen_H 1
 
-#include "VAppendableUserActionAssembly.hh"
-
-class TTree;
+#include "BasicPrimaryGen.hh"
+#include "G4ThreeVector.hh"
+#include "PhaseSpaceVector.hh"
 
 namespace comptonsoft {
 
+class SimXIF;
+
+
 /**
- * PickUpData for first scattering
- *
+ * SimX Interface module to Geant4 Primary generator
  * @author Hirokazu Odaka
- * @date 2008-08-27
- * @date 2011-04-08
- * @date 2017-06-29 | redesign of VAppendableUserActionAssembly
+ * @date 2012-02-16
+ * @date 2012-06-29
+ * @date 2017-07-27 | makePrimarySetting()
  */
-class ScatteringPickUpData : public anlgeant4::VAppendableUserActionAssembly
+class SimXPrimaryGen : public anlgeant4::BasicPrimaryGen
 {
-  DEFINE_ANL_MODULE(ScatteringPickUpData, 3.0);
+  DEFINE_ANL_MODULE(SimXPrimaryGen, 4.1);
 public:
-  ScatteringPickUpData();
-  
+  SimXPrimaryGen();
+  ~SimXPrimaryGen();
+ 
   anlnext::ANLStatus mod_define() override;
   anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_end_run() override;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void SteppingAction(const G4Step* aStep) override;
-
+  void makePrimarySetting() override;
+  
 private:
-  std::string processName_;
+  SimXIF* m_SimXIF;
 
-  bool firstInteraction_ = false;
-  
-  TTree* tree_ = nullptr;
-  
-  double dirx_ = 0.0;
-  double diry_ = 0.0;
-  double dirz_ = 0.0;
-  double energy_ = 0.0;
+  G4ThreeVector m_CenterPosition;
+  G4double m_Radius;
+
+  G4ThreeVector m_Polarization0;
+  G4double m_PolarizationDegree;
+
+  G4double m_Flux; // energy per unit {time, area}
 };
 
-} /* namespace comptonsoft */
+}
 
-#endif /* COMPTONSOFT_ScatteringPickUpData_H */
+#endif /* COMPTONSOFT_SimXPrimaryGen_H */

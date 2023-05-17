@@ -17,48 +17,72 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ScatteringPickUpData_H
-#define COMPTONSOFT_ScatteringPickUpData_H 1
+#ifndef COMPTONSOFT_SimXIF_H
+#define COMPTONSOFT_SimXIF_H 1
 
-#include "VAppendableUserActionAssembly.hh"
+#include <anlnext/BasicModule.hh>
+#include "PhaseSpaceVector.hh"
 
-class TTree;
+
+namespace simx {
+
+struct PARAMETERS;
+struct Source_Type;
+struct Response_Type;
+struct Event_Type;
+
+}
 
 namespace comptonsoft {
 
-/**
- * PickUpData for first scattering
- *
- * @author Hirokazu Odaka
- * @date 2008-08-27
- * @date 2011-04-08
- * @date 2017-06-29 | redesign of VAppendableUserActionAssembly
- */
-class ScatteringPickUpData : public anlgeant4::VAppendableUserActionAssembly
-{
-  DEFINE_ANL_MODULE(ScatteringPickUpData, 3.0);
-public:
-  ScatteringPickUpData();
-  
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
+class DetectorSystem;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void SteppingAction(const G4Step* aStep) override;
+
+/**
+ * SimX Interface module
+ * @author Hirokazu Odaka
+ * @date 2012-02-16 | v 1.0 |
+ * @date 2012-06-29 | v 1.1 |
+ * @date 2012-10-11 | v 1.2 | Detector manager
+ * @date 2013-01-21 | v 2.0 | SimX 2.0
+ */
+class SimXIF : public anlnext::BasicModule
+{
+  DEFINE_ANL_MODULE(SimXIF, 2.0);
+public:
+  SimXIF();
+  ~SimXIF();
+  
+  anlnext::ANLStatus mod_pre_initialize() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
+
+  void generatePrimaries(double area);
+  PhaseSpaceVector takePrimary();
+  void outputPrimaries(const std::string& file_name);
+  size_t NumberOfPrimaries() const { return m_Primaries.size(); }
+
+  void addEvent(double time, double energy, int stripx, int stripy,
+                int detector_id);
+  void outputEvents();
+
+  int findPI(double energy);
 
 private:
-  std::string processName_;
+  // SimX IF
+  struct simx::PARAMETERS* m_SimXParameters;
+  struct simx::Source_Type* m_Source;
+  struct simx::Response_Type* m_Response;
+  struct simx::Event_Type* m_EventList;
+  struct simx::Event_Type* m_Event;
+  int m_SimXStatus;
 
-  bool firstInteraction_ = false;
-  
-  TTree* tree_ = nullptr;
-  
-  double dirx_ = 0.0;
-  double diry_ = 0.0;
-  double dirz_ = 0.0;
-  double energy_ = 0.0;
+  std::vector<PhaseSpaceVector> m_Primaries;
+  std::vector<PhaseSpaceVector>::const_iterator m_PrimaryIter;
+
+  comptonsoft::DetectorSystem* m_DetectorManager;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ScatteringPickUpData_H */
+#endif /* COMPTONSOFT_SimXIF_H */

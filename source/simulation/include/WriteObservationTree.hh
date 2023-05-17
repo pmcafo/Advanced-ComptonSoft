@@ -17,48 +17,45 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef COMPTONSOFT_ScatteringPickUpData_H
-#define COMPTONSOFT_ScatteringPickUpData_H 1
+#ifndef COMPTONSOFT_WriteObservationTree_H
+#define COMPTONSOFT_WriteObservationTree_H 1
 
-#include "VAppendableUserActionAssembly.hh"
+#include "VCSModule.hh"
+#include <memory>
 
 class TTree;
 
+namespace anlgeant4 {
+class InitialInformation;
+}
+
 namespace comptonsoft {
 
-/**
- * PickUpData for first scattering
- *
- * @author Hirokazu Odaka
- * @date 2008-08-27
- * @date 2011-04-08
- * @date 2017-06-29 | redesign of VAppendableUserActionAssembly
- */
-class ScatteringPickUpData : public anlgeant4::VAppendableUserActionAssembly
-{
-  DEFINE_ANL_MODULE(ScatteringPickUpData, 3.0);
-public:
-  ScatteringPickUpData();
-  
-  anlnext::ANLStatus mod_define() override;
-  anlnext::ANLStatus mod_initialize() override;
+class ObservationTreeIOWithInitialInfo;
+class ObservationPickUpData;
 
-  void EventActionAtBeginning(const G4Event*) override;
-  void SteppingAction(const G4Step* aStep) override;
+/**
+ * 
+ * @author Hirokazu Odaka
+ * @date 2017-06-20
+ */
+class WriteObservationTree : public VCSModule
+{
+  DEFINE_ANL_MODULE(WriteObservationTree, 1.0);
+public:
+  WriteObservationTree();
+  ~WriteObservationTree() = default;
+  
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
-  std::string processName_;
-
-  bool firstInteraction_ = false;
-  
-  TTree* tree_ = nullptr;
-  
-  double dirx_ = 0.0;
-  double diry_ = 0.0;
-  double dirz_ = 0.0;
-  double energy_ = 0.0;
+  const ObservationPickUpData* observationPUD_;
+  const anlgeant4::InitialInformation* initialInfo_;
+  TTree* tree_;
+  std::unique_ptr<ObservationTreeIOWithInitialInfo> treeIO_;
 };
 
 } /* namespace comptonsoft */
 
-#endif /* COMPTONSOFT_ScatteringPickUpData_H */
+#endif /* COMPTONSOFT_WriteObservationTree_H */
