@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml">
   <xsl:output method="html" version="5.0" indent="yes" />
@@ -5,8 +6,8 @@
     <html xmlns="http://www.w3.org/1999/xhtml">
       <head>
         <title>Detector Channel Map</title>
-	<style type="text/css">
-          html {background-color: #FFDDFF; color: #000000;}
+	      <style type="text/css">
+          html {background-color: #FFEEFF; color: #000000;}
           body {padding: 1.5%;}
           h1 {text-align: center;}
           .comment {color: #663300;}
@@ -14,8 +15,10 @@
           table {border-collapse: collapse; border: 2px solid #000000;}
           thead {border: 2px solid #000000; text-align: center;}
           tbody {border: 2px solid #000000; text-align: right;}
-          th, td {border: 1px solid #000000;}
-	</style>
+          th, td {border: 1px solid #000000; padding: 0.25em; }
+          .col_readout {background-color: #FFDDEE}
+          .col_xy {background-color: #FFDDFF}
+	      </style>
       </head>
       <body>
         <h1>Detector Channel Map</h1>
@@ -37,15 +40,18 @@
       <li><xsl:value-of select="./@num_channels" /> channels in each section</li>
       <li><xsl:value-of select="./@num_x" /> &#215; <xsl:value-of select="./@num_y" /> pixels (x, y)</li>
     </ul>
-    <xsl:apply-templates select="section" />
-    <hr />
-  </xsl:template>
-  <xsl:template match="section">
-    <h3>Section <xsl:value-of select="./@id" /></h3>
-    <p>Number of channels: <span class="total-num"><xsl:value-of select="count(channel)" /></span></p>
     <table>
+      <colgroup class="col_readout">
+        <col />
+        <col />
+      </colgroup>
+      <colgroup class="col_xy">
+        <col />
+        <col />
+      </colgroup>
       <thead>
         <tr>
+          <th>Section</th>
           <th>Channel</th>
           <th>Pixel X</th>
           <th>Pixel Y</th>
@@ -58,9 +64,10 @@
   </xsl:template>
   <xsl:template match="channel">
     <tr>
-      <th><xsl:value-of select="./@id" /></th>
-      <td><xsl:value-of select="x" /></td>
-      <td><xsl:value-of select="y" /></td>
+      <th><xsl:value-of select="@section" /></th>
+      <th><xsl:value-of select="@index" /></th>
+      <td><xsl:value-of select="@x" /></td>
+      <td><xsl:value-of select="@y" /></td>
     </tr>
   </xsl:template>
 </xsl:stylesheet>
