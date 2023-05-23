@@ -77,6 +77,12 @@
           <xs:attribute name="xstrip" type="xs:integer" />
         </xs:complexType>
       </xs:element>
+      <xs:element name="depth_sensing" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:attribute name="mode" type="xs:integer" use="required" />
+          <xs:attribute name="resolution" type="xs:double" use="required" />
+        </xs:complexType>
+      </xs:element>
       <xs:element name="quenching" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:attribute name="factor" type="xs:double" use="required" />
