@@ -407,4 +407,45 @@ void output_primaries(const std::vector<comptonsoft::PhaseSpaceVector>* primarie
   fits_create_tbl(fits, ASCII_TBL, 0, 3,
                   const_cast<char**>(ttype),
                   const_cast<char**>(tform),
-       
+                  const_cast<char**>(tunit),
+                  const_cast<char*>(extname),
+                  &fitsStatus);
+  
+  size_t nRows = primaries->size();
+  double* energyArray = new double[nRows];
+  double* thetaArray = new double[nRows];
+  double* phiArray = new double[nRows];
+
+  for (size_t i=0; i<nRows; i++) {
+    double energy = primaries->at(i).Energy()/unit::keV;
+    G4ThreeVector vec(-primaries->at(i).DirectionX(),
+                      -primaries->at(i).DirectionY(),
+                      -primaries->at(i).DirectionZ());
+    double theta = vec.theta();
+    double phi = vec.phi();
+    energyArray[i] = energy;
+    thetaArray[i] = theta;
+    phiArray[i] = phi;
+  }
+  
+  fits_write_col_dbl(fits, 1, 1, 0, nRows, energyArray, &fitsStatus);
+  fits_write_col_dbl(fits, 2, 1, 0, nRows, thetaArray, &fitsStatus);
+  fits_write_col_dbl(fits, 3, 1, 0, nRows, phiArray, &fitsStatus);
+
+  // std::string keyName("NAXIS2");
+  // std::string comment("");
+  // fits_write_key_lng(fits, const_cast<char*>(keyName.c_str()), 100000000,
+  //                    const_cast<char*>(comment.c_str()), &fitsStatus);
+  
+  fits_close_file(fits, &fitsStatus);
+  if (fitsStatus) {
+    fits_report_error(stderr, fitsStatus);
+    return;
+  }
+
+  delete[] energyArray;
+  delete[] thetaArray;
+  delete[] phiArray;
+}
+
+} /* anonymous namespace */
