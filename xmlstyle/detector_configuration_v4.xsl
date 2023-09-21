@@ -9,12 +9,12 @@
           html {background-color: #FFFFDD; color: #000000;}
           body {padding: 1.5%;}
           h1 {text-align: center;}
-          .comment {color: #663300;}
-          .total-num {color: #009933;}
           table {border-collapse: collapse; border: 2px solid #000000;}
           thead {border: 2px solid #000000; text-align: center;}
           tbody {border: 2px solid #000000; text-align: right;}
-          th, td {border: 1px solid #000000;}
+          th, td {border: 1px solid #000000; padding: 0.25em; }
+          .comment {color: #663300;}
+          .total-num {color: #009933;}
           table#physical-config tr td:nth-of-type(1) { text-align: left; }
           table#physical-config tr td:nth-of-type(2) { text-align: left; }
           table#physical-config tr td:nth-of-type(21) { text-align: left; }
@@ -47,16 +47,15 @@
           <th>ID</th>
           <th>Name</th>
           <th>Type</th>
-          <th colspan="2">Width</th>
-          <th>Thckness</th>
+          <th colspan="3">Size</th>
           <th colspan="2">Offset</th>
           <th colspan="2">Num Pixel</th>
-	  <th colspan="2">Pixel Pitch</th>
+	        <th colspan="2">Pixel Pitch</th>
           <th colspan="3">Position</th>
           <th colspan="3">X-axis Direction</th>
           <th colspan="3">Y-axis Direction</th>
           <th>Energy Priority</th>
-          <th colspan="2">Readout</th>
+          <th colspan="2">Sections</th>
         </tr>
         <tr>
           <th></th>
@@ -64,7 +63,7 @@
           <th></th>
           <th>X</th>
           <th>Y</th>
-          <th></th>
+          <th>Z</th>
           <th>X</th>
           <th>Y</th>
           <th>X</th>
@@ -93,32 +92,32 @@
   <xsl:template match="detector">
     <tr>
       <th><xsl:value-of select="./@id" /></th>
-      <td><xsl:value-of select="name" /></td>
-      <td><xsl:value-of select="type" /></td>
-      <td><xsl:value-of select="geometry/widthx" /></td>
-      <td><xsl:value-of select="geometry/widthy" /></td>
-      <td><xsl:value-of select="geometry/thickness" /></td>
-      <td><xsl:value-of select="geometry/offsetx" /></td>
-      <td><xsl:value-of select="geometry/offsety" /></td>
-      <td><xsl:value-of select="pixel/numx" /></td>
-      <td><xsl:value-of select="pixel/numy" /></td>
-      <td><xsl:value-of select="pixel/pitchx" /></td>
-      <td><xsl:value-of select="pixel/pitchy" /></td>
-      <td><xsl:value-of select="position/x" /></td>
-      <td><xsl:value-of select="position/y" /></td>
-      <td><xsl:value-of select="position/z" /></td>
-      <td><xsl:value-of select="direction_xaxis/x" /></td>
-      <td><xsl:value-of select="direction_xaxis/y" /></td>
-      <td><xsl:value-of select="direction_xaxis/z" /></td>
-      <td><xsl:value-of select="direction_yaxis/x" /></td>
-      <td><xsl:value-of select="direction_yaxis/y" /></td>
-      <td><xsl:value-of select="direction_yaxis/z" /></td>
-      <td><xsl:value-of select="energy_priority" /></td>
-      <td><span class="total-num"><xsl:value-of select="count(readout/section)" /></span></td>
-      <td><xsl:apply-templates select="readout/section" /></td>
+      <td><xsl:value-of select="./@name" /></td>
+      <td><xsl:value-of select="./@type" /></td>
+      <td><xsl:value-of select="geometry/@x" /></td>
+      <td><xsl:value-of select="geometry/@y" /></td>
+      <td><xsl:value-of select="geometry/@z" /></td>
+      <td><xsl:value-of select="offset/@x" /></td>
+      <td><xsl:value-of select="offset/@y" /></td>
+      <td><xsl:value-of select="pixel/@number_x" /></td>
+      <td><xsl:value-of select="pixel/@number_y" /></td>
+      <td><xsl:value-of select="pixel/@size_x" /></td>
+      <td><xsl:value-of select="pixel/@size_y" /></td>
+      <td><xsl:value-of select="position/@x" /></td>
+      <td><xsl:value-of select="position/@y" /></td>
+      <td><xsl:value-of select="position/@z" /></td>
+      <td><xsl:value-of select="xaxis_direction/@x" /></td>
+      <td><xsl:value-of select="xaxis_direction/@y" /></td>
+      <td><xsl:value-of select="xaxis_direction/@z" /></td>
+      <td><xsl:value-of select="yaxis_direction/@x" /></td>
+      <td><xsl:value-of select="yaxis_direction/@y" /></td>
+      <td><xsl:value-of select="yaxis_direction/@z" /></td>
+      <td><xsl:value-of select="energy_priority/@electrode_side" /></td>
+      <td><span class="total-num"><xsl:value-of select="count(sections/section)" /></span></td>
+      <td><xsl:apply-templates select="sections/section" /></td>
     </tr>
   </xsl:template>
-  <xsl:template match="readout/section">
+  <xsl:template match="sections/section">
     <span><xsl:number value="position()-1"/>:(<xsl:value-of select="./@num_channels" />, <xsl:value-of select="./@electrode_side" />) </span>
   </xsl:template>
   <xsl:template match="readout">
@@ -145,7 +144,7 @@
     </tr>
   </xsl:template>
   <xsl:template match="module/section">
-    <span>(<xsl:value-of select="./detector/@id" />, <xsl:value-of select="./detector/@section" />) </span>
+    <span>(<xsl:value-of select="./@detector_id" />, <xsl:value-of select="./@section" />) </span>
   </xsl:template>
   <xsl:template match="groups">
     <h2>Detector Groups and Hit Patterns</h2>
