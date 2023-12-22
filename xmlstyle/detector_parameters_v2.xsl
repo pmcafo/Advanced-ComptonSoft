@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml">
@@ -85,6 +86,10 @@
       <colgroup class="col_upside">
         <col />
       </colgroup>
+      <colgroup class="col_depth">
+        <col />
+        <col />
+      </colgroup>
       <colgroup class="col_conditions">
         <col />
         <col />
@@ -161,7 +166,7 @@
       <tr>
         <th colspan="3"></th>
         <th></th>
-        <th colspan="18">Sensor device simulation</th>
+        <th colspan="20">Sensor device simulation</th>
         <xsl:choose>
           <xsl:when test="$detector_type='2DStrip'">
             <th colspan="8">Channel properties (cathode)</th>
@@ -183,6 +188,7 @@
       <tr>
         <th colspan="3">Detector ID</th>
         <th>Upside</th>
+        <th colspan="2">Depth sensing</th>
         <th>Quenching</th>
         <th>Temperature</th>
         <th colspan="6">E-field</th>
@@ -221,6 +227,8 @@
         <th>Path</th>
         <th>Copy No.</th>
         <th></th>
+        <th>mode</th>
+        <th>resolution</th>
         <th>factor</th>
         <th></th>
         <th>Bias [V]</th>
@@ -348,6 +356,18 @@
             <xsl:with-param name="upside_xstrip" select="$final_upside_xstrip" />
           </xsl:call-template>
         </span>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/depth_sensing/@mode" />
+          <xsl:with-param name="special" select="$parameters/depth_sensing/@mode" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/depth_sensing/@resolution" />
+          <xsl:with-param name="special" select="$parameters/depth_sensing/@resolution" />
+        </xsl:call-template>
       </td>
       <td>
         <xsl:call-template name="display_parameter">
