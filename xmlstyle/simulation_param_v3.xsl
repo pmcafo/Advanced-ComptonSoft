@@ -261,4 +261,36 @@
       <xsl:choose>
 	<xsl:when test="$final_sim_diffusion_mode=1">
 	  <td><xsl:call-template name="disp_param"><xsl:with-param name="common" select="$com_dif_factor_anode" /><xsl:with-param name="special" select="$dif_factor_anode" /></xsl:call-template></td>
-	  <td><xsl:call-template name="disp_param"><xsl:with-param name="common"
+	  <td><xsl:call-template name="disp_param"><xsl:with-param name="common" select="$com_dif_factor_cathode" /><xsl:with-param name="special" select="$dif_factor_cathode" /></xsl:call-template></td>
+	</xsl:when>
+	<xsl:when test="$final_sim_diffusion_mode=2">
+	  <td><xsl:call-template name="disp_param"><xsl:with-param name="common" select="$com_dif_const_anode" /><xsl:with-param name="special" select="$dif_const_anode" /></xsl:call-template> um</td>
+	  <td><xsl:call-template name="disp_param"><xsl:with-param name="common" select="$com_dif_const_cathode" /><xsl:with-param name="special" select="$dif_const_cathode" /></xsl:call-template> um</td>
+	</xsl:when>
+	<xsl:otherwise>
+	  <td></td><td></td>
+	</xsl:otherwise>
+      </xsl:choose>
+    </tr>
+  </xsl:template>
+
+
+  <xsl:template name="disp_param">
+    <xsl:param name="common" select="''" />
+    <xsl:param name="special" select="''" />
+    <xsl:choose>
+      <xsl:when test="string-length($special)=0"><xsl:value-of select="$common" /></xsl:when>
+      <xsl:otherwise><span class="special_param"><xsl:value-of select="$special" /></span></xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template name="disp_upside">
+    <xsl:param name="upside_anode" select="''" />
+    <xsl:param name="upside_pad" select="''" />
+    <xsl:param name="upside_xstrip" select="''" />
+    <xsl:if test="$upside_anode=1">anode</xsl:if><xsl:if test="$upside_anode=0">cathode</xsl:if> /
+    <xsl:if test="$upside_pad=1">pad</xsl:if><xsl:if test="$upside_pad=0">com</xsl:if>
+    <xsl:if test="$upside_xstrip=1">x-strip</xsl:if><xsl:if test="$upside_xstrip=0">y-strip</xsl:if>
+  </xsl:template>
+
+</xsl:stylesheet>
