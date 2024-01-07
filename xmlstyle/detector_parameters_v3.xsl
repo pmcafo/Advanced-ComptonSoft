@@ -382,4 +382,399 @@
       </xsl:variable>
       <xsl:variable name="final_upside_pixel">
         <xsl:call-template name="display_parameter">
-          <xsl:with-param name="common" select="$common_par
+          <xsl:with-param name="common" select="$common_parameters/upside/@pixel" />
+          <xsl:with-param name="special" select="$parameters/upside/@pixel" />
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:variable name="final_upside_xstrip">
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/upside/@xstrip" />
+          <xsl:with-param name="special" select="$parameters/upside/@xstrip" />
+        </xsl:call-template>
+      </xsl:variable>
+      <td>
+        <span>
+          <xsl:if test="string-length($parameters/upside/@anode)&gt;0 or string-length($parameters/upside/@pixel)&gt;0 or string-length($parameters/upside/@xstrip)&gt;0">
+            <xsl:attribute name="class">special_param</xsl:attribute>
+          </xsl:if>
+          <xsl:call-template name="display_upside">
+            <xsl:with-param name="upside_anode" select="$final_upside_anode" />
+            <xsl:with-param name="upside_pixel" select="$final_upside_pixel" />
+            <xsl:with-param name="upside_xstrip" select="$final_upside_xstrip" />
+          </xsl:call-template>
+        </span>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/depth_sensing/@mode" />
+          <xsl:with-param name="special" select="$parameters/depth_sensing/@mode" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/depth_sensing/@resolution" />
+          <xsl:with-param name="special" select="$parameters/depth_sensing/@resolution" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/quenching/@factor" />
+          <xsl:with-param name="special" select="$parameters/quenching/@factor" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/temperature/@value" />
+          <xsl:with-param name="special" select="$parameters/temperature/@value" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@bias" />
+          <xsl:with-param name="special" select="$parameters/efield/@bias" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@mode" />
+          <xsl:with-param name="special" select="$parameters/efield/@mode" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@param0" />
+          <xsl:with-param name="special" select="$parameters/efield/@param0" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@param1" />
+          <xsl:with-param name="special" select="$parameters/efield/@param1" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@param2" />
+          <xsl:with-param name="special" select="$parameters/efield/@param2" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@param3" />
+          <xsl:with-param name="special" select="$parameters/efield/@param3" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@wp_map_name" />
+          <xsl:with-param name="special" select="$parameters/efield/@wp_map_name" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/efield/@efield_map_name" />
+          <xsl:with-param name="special" select="$parameters/efield/@efield_map_name" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/@mode" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/@mode" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/@cce_map_name" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/@cce_map_name" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/mutau/@electron" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/mutau/@electron" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/mutau/@hole" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/mutau/@hole" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/mobility/@electron" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/mobility/@electron" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/mobility/@hole" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/mobility/@hole" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/lifetime/@electron" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/lifetime/@electron" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/charge_collection/lifetime/@hole" />
+          <xsl:with-param name="special" select="$parameters/charge_collection/lifetime/@hole" />
+        </xsl:call-template>
+      </td>
+      <xsl:variable name="final_diffusion_mode">
+        <xsl:call-template name="display_parameter">
+          <xsl:with-param name="common" select="$common_parameters/diffusion/@mode" />
+          <xsl:with-param name="special" select="$parameters/diffusion/@mode" />
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:choose>
+        <xsl:when test="$final_diffusion_mode=0">
+          <td>
+            <span>
+              <xsl:if test="string-length($parameters/diffusion/@mode)&gt;0">
+                <xsl:attribute name="class">special_param</xsl:attribute>
+              </xsl:if>
+              <xsl:text>0: none</xsl:text>
+            </span>
+          </td>
+          <td />
+          <td />
+        </xsl:when>
+        <xsl:when test="$final_diffusion_mode=1">
+          <td>
+            <span>
+              <xsl:if test="string-length($parameters/diffusion/@mode)&gt;0">
+                <xsl:attribute name="class">special_param</xsl:attribute>
+              </xsl:if>
+              <xsl:text>1: factor</xsl:text>
+            </span>
+          </td>
+          <td>
+            <xsl:call-template name="display_parameter">
+              <xsl:with-param name="common" select="$common_parameters/diffusion/spread_factor/@anode" />
+              <xsl:with-param name="special" select="$parameters/diffusion/spread_factor/@anode" />
+            </xsl:call-template>
+          </td>
+          <td>
+            <xsl:call-template name="display_parameter">
+              <xsl:with-param name="common" select="$common_parameters/diffusion/spread_factor/@cathode" />
+              <xsl:with-param name="special" select="$parameters/diffusion/spread_factor/@cathode" />
+            </xsl:call-template>
+          </td>
+        </xsl:when>
+        <xsl:when test="$final_diffusion_mode=2">
+          <td>
+            <span>
+              <xsl:if test="string-length($parameters/diffusion/@mode)&gt;0">
+                <xsl:attribute name="class">special_param</xsl:attribute>
+              </xsl:if>
+              <xsl:text>2: constant</xsl:text>
+            </span>
+          </td>
+          <td>
+            <xsl:call-template name="display_parameter">
+              <xsl:with-param name="common" select="$common_parameters/diffusion/constant/@anode" />
+              <xsl:with-param name="special" select="$parameters/diffusion/constant/@anode" />
+            </xsl:call-template>
+            <xsl:text> cm</xsl:text>
+          </td>
+          <td>
+            <xsl:call-template name="display_parameter">
+              <xsl:with-param name="common" select="$common_parameters/diffusion/constant/@cathode" />
+              <xsl:with-param name="special" select="$parameters/diffusion/constant/@cathode" />
+            </xsl:call-template>
+            <xsl:text> cm</xsl:text>
+          </td>
+        </xsl:when>
+        <xsl:otherwise>
+          <td>
+            <span>
+              <xsl:if test="string-length($parameters/diffusion/@mode)&gt;0">
+                <xsl:attribute name="class">special_param</xsl:attribute>
+              </xsl:if>
+              <xsl:value-of select="$final_diffusion_mode" />
+              <xsl:if test="string-length($final_diffusion_mode)&gt;0">
+                <xsl:text>: unknown</xsl:text>
+              </xsl:if>  
+            </span>
+          </td>
+          <td />
+          <td />
+        </xsl:otherwise>
+      </xsl:choose>
+      <td>
+        <xsl:call-template name="display_parameter" >
+          <xsl:with-param name="common" select="$common_parameters/timing_resolution/@trigger" />
+          <xsl:with-param name="special" select="$parameters/timing_resolution/@trigger" />
+        </xsl:call-template>
+      </td> 
+      <td>
+        <xsl:call-template name="display_parameter" >
+          <xsl:with-param name="common" select="$common_parameters/timing_resolution/@energy_measurement" />
+          <xsl:with-param name="special" select="$parameters/timing_resolution/@energy_measurement" />
+        </xsl:call-template>
+      </td>
+      <td>
+        <xsl:call-template name="display_parameter" >
+          <xsl:with-param name="common" select="$common_parameters/pedestal_generation/@flag" />
+          <xsl:with-param name="special" select="$parameters/pedestal_generation/@flag" />
+        </xsl:call-template>
+      </td>
+      <xsl:choose>
+        <xsl:when test="$detector_type='2DStrip'">
+          <xsl:call-template name="display_channel_properties">
+            <xsl:with-param name="common_parameters" select="$common_parameters/channel_properties[@side='cathode']" />
+            <xsl:with-param name="parameters" select="$parameters/channel_properties[@side='cathode']" />
+          </xsl:call-template>
+          <xsl:call-template name="display_channel_properties">
+            <xsl:with-param name="common_parameters" select="$common_parameters/channel_properties[@side='anode']" />
+            <xsl:with-param name="parameters" select="$parameters/channel_properties[@side='anode']" />
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:call-template name="display_channel_properties">
+            <xsl:with-param name="common_parameters" select="$common_parameters/channel_properties" />
+            <xsl:with-param name="parameters" select="$parameters/channel_properties" />
+          </xsl:call-template>
+        </xsl:otherwise>
+      </xsl:choose>
+      <td>
+        <xsl:call-template name="display_parameter" >
+          <xsl:with-param name="common" select="$common_parameters/reconstruction/@mode" />
+          <xsl:with-param name="special" select="$parameters/reconstruction/@mode" />
+        </xsl:call-template>
+      </td>
+      <xsl:if test="$detector_type='2DStrip'">
+        <td>
+          <xsl:call-template name="display_parameter" >
+            <xsl:with-param name="common" select="$common_parameters/reconstruction/energy_consistency_check/@lower_function_c0" />
+            <xsl:with-param name="special" select="$parameters/reconstruction/energy_consistency_check/@lower_function_c0" />
+          </xsl:call-template>
+        </td>
+        <td>
+          <xsl:call-template name="display_parameter" >
+            <xsl:with-param name="common" select="$common_parameters/reconstruction/energy_consistency_check/@lower_function_c1" />
+            <xsl:with-param name="special" select="$parameters/reconstruction/energy_consistency_check/@lower_function_c1" />
+          </xsl:call-template>
+        </td>
+        <td>
+          <xsl:call-template name="display_parameter" >
+            <xsl:with-param name="common" select="$common_parameters/reconstruction/energy_consistency_check/@upper_function_c0" />
+            <xsl:with-param name="special" select="$parameters/reconstruction/energy_consistency_check/@upper_function_c0" />
+          </xsl:call-template>
+        </td>
+        <td>
+          <xsl:call-template name="display_parameter" >
+            <xsl:with-param name="common" select="$common_parameters/reconstruction/energy_consistency_check/@upper_function_c1" />
+            <xsl:with-param name="special" select="$parameters/reconstruction/energy_consistency_check/@upper_function_c1" />
+          </xsl:call-template>
+        </td>
+      </xsl:if>
+    </tr>
+  </xsl:template>
+  <xsl:template name="display_parameter">
+    <xsl:param name="common" select="''" />
+    <xsl:param name="special" select="''" />
+    <xsl:choose>
+      <xsl:when test="string-length($special)=0"><xsl:value-of select="$common" /></xsl:when>
+      <xsl:otherwise><span class="special_param"><xsl:value-of select="$special" /></span></xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  <xsl:template name="display_upside">
+    <xsl:param name="upside_anode" select="''" />
+    <xsl:param name="upside_pixel" select="''" />
+    <xsl:param name="upside_xstrip" select="''" />
+    <xsl:if test="$upside_anode=1">anode</xsl:if>
+    <xsl:if test="$upside_anode=0">cathode</xsl:if>
+    <xsl:text>/</xsl:text>
+    <xsl:if test="$upside_pixel=1">pixel</xsl:if>
+    <xsl:if test="$upside_pixel=0">common</xsl:if>
+    <xsl:if test="$upside_xstrip=1">x-strip</xsl:if>
+    <xsl:if test="$upside_xstrip=0">y-strip</xsl:if>
+  </xsl:template>
+  <xsl:template name="display_channel_properties">
+    <xsl:param name="common_parameters" />
+    <xsl:param name="parameters" />
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/disable/@status" />
+        <xsl:with-param name="special" select="$parameters/disable/@status" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/trigger_discrimination/@center" />
+        <xsl:with-param name="special" select="$parameters/trigger_discrimination/@center" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/trigger_discrimination/@sigma" />
+        <xsl:with-param name="special" select="$parameters/trigger_discrimination/@sigma" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/noise_level/@param0" />
+        <xsl:with-param name="special" select="$parameters/noise_level/@param0" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/noise_level/@param1" />
+        <xsl:with-param name="special" select="$parameters/noise_level/@param1" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/noise_level/@param2" />
+        <xsl:with-param name="special" select="$parameters/noise_level/@param2" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/compensation/@factor" />
+        <xsl:with-param name="special" select="$parameters/compensation/@factor" />
+      </xsl:call-template>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/compensation/@function" />
+        <xsl:with-param name="special" select="$parameters/compensation/@function" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/pedestal/@value" />
+        <xsl:with-param name="special" select="$parameters/pedestal/@value" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/gain_correction/@c0" />
+        <xsl:with-param name="special" select="$parameters/gain_correction/@c0" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/gain_correction/@c1" />
+        <xsl:with-param name="special" select="$parameters/gain_correction/@c1" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/gain_correction/@c2" />
+        <xsl:with-param name="special" select="$parameters/gain_correction/@c2" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/gain_correction/@c3" />
+        <xsl:with-param name="special" select="$parameters/gain_correction/@c3" />
+      </xsl:call-template>
+    </td>
+    <td>
+      <xsl:call-template name="display_parameter" >
+        <xsl:with-param name="common" select="$common_parameters/threshold/@value" />
+        <xsl:with-param name="special" select="$par
