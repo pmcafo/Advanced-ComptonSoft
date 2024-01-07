@@ -777,4 +777,8 @@
     <td>
       <xsl:call-template name="display_parameter" >
         <xsl:with-param name="common" select="$common_parameters/threshold/@value" />
-        <xsl:with-param name="special" select="$par
+        <xsl:with-param name="special" select="$parameters/threshold/@value" />
+      </xsl:call-template>
+    </td>
+  </xsl:template>
+</xsl:stylesheet>
